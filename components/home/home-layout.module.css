@@ -1,0 +1,74 @@
+.fullBleedSection,
+.viewportFrame,
+.carouselFrame {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.fullBleedSection {
+  position: relative;
+  width: 100%;
+  scroll-margin-top: var(--home-nav-offset, 82px);
+}
+
+.compact {
+  padding-block: var(--home-space-compact, clamp(64px, 7svh, 96px));
+}
+
+.regular {
+  padding-block: var(--home-space-section, clamp(80px, 9svh, 124px));
+}
+
+.scene {
+  min-height: min(100svh, 980px);
+  padding-block: var(--home-space-section, clamp(80px, 9svh, 124px));
+}
+
+.viewportFrame {
+  width: min(
+    calc(100% - var(--home-page-inset, 32px) - var(--home-page-inset, 32px)),
+    var(--home-frame-width)
+  );
+  margin-inline: auto;
+}
+
+.narrow { --home-frame-width: var(--home-frame-narrow, 1180px); }
+.standard { --home-frame-width: var(--home-frame-standard, 1440px); }
+.wide { --home-frame-width: var(--home-frame-wide, 1600px); }
+
+.carouselFrame {
+  width: min(
+    calc(100% - var(--home-carousel-inset, 18px) - var(--home-carousel-inset, 18px)),
+    var(--home-carousel-width, 1680px)
+  );
+  margin-inline: auto;
+  overflow: clip;
+}
+
+.carouselwide {
+  --home-carousel-inset: max(8px, calc(var(--home-page-inset, 32px) * .35));
+  --home-carousel-width: 1760px;
+}
+
+.carouselsafe {
+  --home-carousel-inset: var(--home-page-inset, 32px);
+  --home-carousel-width: var(--home-frame-wide, 1600px);
+}
+
+@media (max-width: 760px) {
+  .scene { min-height: 0; }
+}
+
+@media (min-width: 1024px) and (pointer: fine) {
+  :global(html.wilo-fullpage) .fullBleedSection {
+    height: calc(100svh - var(--wilo-home-header-height, 72px));
+    min-height: calc(100svh - var(--wilo-home-header-height, 72px));
+  }
+
+  :global(html.wilo-fullpage) .compact,
+  :global(html.wilo-fullpage) .regular,
+  :global(html.wilo-fullpage) .scene {
+    padding-block: clamp(26px, 4svh, 48px);
+  }
+}

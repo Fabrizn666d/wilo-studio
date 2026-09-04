@@ -1,0 +1,511 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String               @id @default(cuid())
+  email            String               @unique
+  name             String?
+  passwordHash     String
+  role             String               @default("EDITOR")
+  active           Boolean              @default(true)
+  lastLoginAt      DateTime?
+  sessionVersion   Int                  @default(0)
+  media            Media[]
+  assignedLeads    Lead[]               @relation("LeadAssignee")
+  assignedProjects Project[]            @relation("ProjectAssignee")
+  createdQuotes    Quote[]              @relation("QuoteCreator")
+  activities       Activity[]           @relation("ActivityActor")
+  notes            Note[]               @relation("NoteAuthor")
+  passwordResets   PasswordResetToken[]
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  @@index([role, active])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, expiresAt])
+  @@index([expiresAt, usedAt])
+}
+
+model Project {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  category        String
+  clientId        String?
+  client          Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  assignedToId    String?
+  assignedTo      User?     @relation("ProjectAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  summary         String?
+  description     String?
+  challenge       String?
+  solution        String?
+  services        String    @default("[]")
+  deliverables    String    @default("[]")
+  coverImage      String?
+  videoUrl        String?
+  logoUrl         String?
+  gallery         String    @default("[]")
+  liveUrl         String?
+  stagingUrl      String?
+  repositoryUrl   String?
+  internalNotes   String?
+  year            Int?
+  status          String    @default("PLANNING")
+  startDate       DateTime?
+  targetDate      DateTime?
+  completedAt     DateTime?
+  publicCaseStudy Boolean   @default(false)
+  contentStatus   String    @default("DRAFT")
+  seoTitle        String?
+  seoDescription  String?
+  archivedAt      DateTime?
+  featured        Boolean   @default(false)
+  published       Boolean   @default(false)
+  sortOrder       Int       @default(0)
+  quotes          Quote[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([category, published, sortOrder])
+  @@index([clientId])
+  @@index([status, archivedAt])
+  @@index([assignedToId, status])
+  @@index([publicCaseStudy, contentStatus, sortOrder])
+}
+
+model Service {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  category       String
+  summary        String
+  description    String?
+  icon           String?
+  imageUrl       String?
+  priceFromCents Int?
+  currency       String   @default("PEN")
+  published      Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([category, published, sortOrder])
+}
+
+model Plan {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  title        String
+  subtitle     String?
+  category     String   @default("WEB")
+  priceCents   Int
+  taxCents     Int      @default(0)
+  includesTax  Boolean  @default(false)
+  currency     String   @default("PEN")
+  billingCycle String?
+  features     String   @default("[]")
+  note         String?
+  featured     Boolean  @default(false)
+  published    Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([category, published, sortOrder])
+}
+
+model ProductCategory {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  description String?
+  imageUrl    String?
+  active      Boolean   @default(true)
+  sortOrder   Int       @default(0)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([active, sortOrder])
+}
+
+model Product {
+  id              String          @id @default(cuid())
+  categoryId      String
+  category        ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  slug            String          @unique
+  sku             String?         @unique
+  name            String
+  description     String?
+  specifications  String          @default("[]")
+  images          String          @default("[]")
+  licenseType     String?
+  licenseDuration String?
+  digital         Boolean         @default(true)
+  education       Boolean         @default(false)
+  priceCents      Int
+  includesTax     Boolean         @default(true)
+  currency        String          @default("PEN")
+  stock           Int?
+  active          Boolean         @default(true)
+  featured        Boolean         @default(false)
+  licenseKeys     LicenseKey[]
+  orderItems      OrderItem[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([categoryId, active])
+  @@index([featured, active])
+}
+
+model LicenseKey {
+  id             String     @id @default(cuid())
+  productId      String
+  product        Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  encryptedValue String
+  iv             String
+  authTag        String
+  fingerprint    String     @unique
+  status         String     @default("AVAILABLE")
+  orderItemId    String?
+  orderItem      OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+  deliveredAt    DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([productId, status])
+  @@index([orderItemId])
+}
+
+model Order {
+  id                   String      @id @default(cuid())
+  number               String      @unique
+  customerName         String
+  email                String
+  phone                String
+  documentType         String      @default("BOLETA")
+  documentNumber       String?
+  companyName          String?
+  companyRuc           String?
+  paymentMethod        String
+  status               String      @default("PENDING")
+  currency             String      @default("PEN")
+  subtotalCents        Int
+  taxCents             Int         @default(0)
+  totalCents           Int
+  voucherUrl           String?
+  paymentReference     String?
+  stockReserved        Boolean     @default(false)
+  reservationExpiresAt DateTime?
+  notes                String?
+  publicTokenHash      String
+  items                OrderItem[]
+  paidAt               DateTime?
+  deliveredAt          DateTime?
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  @@index([status, createdAt])
+  @@index([stockReserved, reservationExpiresAt])
+  @@index([email, createdAt])
+}
+
+model OrderItem {
+  id             String       @id @default(cuid())
+  orderId        String
+  order          Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String?
+  product        Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName    String
+  sku            String?
+  unitPriceCents Int
+  quantity       Int
+  totalCents     Int
+  licenseKeys    LicenseKey[]
+  createdAt      DateTime     @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Client {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  name         String
+  contactName  String?
+  email        String?
+  phone        String?
+  whatsapp     String?
+  taxId        String?
+  city         String?
+  country      String        @default("PE")
+  notes        String?
+  source       String        @default("MANUAL")
+  logoUrl      String?
+  website      String?
+  active       Boolean       @default(true)
+  featured     Boolean       @default(false)
+  sortOrder    Int           @default(0)
+  projects     Project[]
+  leads        Lead[]
+  quotes       Quote[]
+  testimonials Testimonial[]
+  referrals    Referral[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  archivedAt   DateTime?
+
+  @@index([active, sortOrder])
+  @@index([email])
+  @@index([phone])
+  @@index([archivedAt, name])
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  clientId  String?
+  client    Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  name      String
+  company   String
+  role      String?
+  quote     String
+  avatarUrl String?
+  published Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, sortOrder])
+  @@index([clientId])
+}
+
+model Promotion {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  summary         String?
+  details         String    @default("[]")
+  imageUrl        String?
+  referralBenefit String?
+  startAt         DateTime?
+  endAt           DateTime?
+  active          Boolean   @default(false)
+  featured        Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([active, startAt, endAt])
+}
+
+model Referral {
+  id            String   @id @default(cuid())
+  clientId      String?
+  client        Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  referrerName  String
+  referrerEmail String?
+  referrerPhone String
+  referredName  String
+  referredEmail String?
+  referredPhone String
+  status        String   @default("NEW")
+  benefit       String?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([clientId])
+}
+
+model Lead {
+  id                String    @id @default(cuid())
+  name              String
+  company           String?
+  clientId          String?
+  client            Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  assignedToId      String?
+  assignedTo        User?     @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  phone             String?
+  email             String
+  type              String    @default("CONTACT")
+  service           String?
+  message           String?
+  details           String    @default("{}")
+  estimatedMinCents Int?
+  estimatedMaxCents Int?
+  source            String    @default("website")
+  status            String    @default("NEW")
+  priority          String    @default("NORMAL")
+  budgetRange       String?
+  launchTimeframe   String?
+  lastContactAt     DateTime?
+  nextFollowUpAt    DateTime?
+  followUpNote      String?
+  lostReason        String?
+  consentAt         DateTime?
+  archivedAt        DateTime?
+  quotes            Quote[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([status, createdAt])
+  @@index([email, createdAt])
+  @@index([source, createdAt])
+  @@index([assignedToId, status])
+  @@index([clientId])
+  @@index([nextFollowUpAt, status])
+}
+
+model Quote {
+  id                String      @id @default(cuid())
+  number            String      @unique
+  clientId          String
+  client            Client      @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  leadId            String?
+  lead              Lead?       @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  projectId         String?
+  project           Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdById       String
+  createdBy         User        @relation("QuoteCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  status            String      @default("DRAFT")
+  currency          String      @default("PEN")
+  taxRateBps        Int         @default(0)
+  subtotalCents     Int
+  taxCents          Int         @default(0)
+  totalCents        Int
+  issueDate         DateTime    @default(now())
+  expiresAt         DateTime?
+  notes             String?
+  sentAt            DateTime?
+  acceptedAt        DateTime?
+  deliveryStartedAt DateTime?
+  archivedAt        DateTime?
+  items             QuoteItem[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([status, createdAt])
+  @@index([clientId, createdAt])
+  @@index([leadId])
+  @@index([projectId])
+  @@index([createdById])
+}
+
+model QuoteItem {
+  id             String   @id @default(cuid())
+  quoteId        String
+  quote          Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  name           String
+  description    String?
+  quantity       Int      @default(1)
+  unitPriceCents Int
+  subtotalCents  Int
+  position       Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  @@index([quoteId, position])
+}
+
+model QuoteCounter {
+  year      Int      @id
+  nextValue Int      @default(1)
+  updatedAt DateTime @updatedAt
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  actor       User?    @relation("ActivityActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  entityType  String
+  entityId    String
+  action      String
+  metadata    String   @default("{}")
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([action, createdAt])
+}
+
+model Note {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  authorId   String
+  author     User     @relation("NoteAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  body       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([entityType, entityId, createdAt])
+  @@index([authorId, createdAt])
+}
+
+model Complaint {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  consumerName    String
+  documentType    String
+  documentNumber  String
+  email           String
+  phone           String
+  address         String
+  recordType      String    @default("RECLAMO")
+  goodType        String
+  amountCents     Int?
+  description     String
+  requestedAction String
+  status          String    @default("RECEIVED")
+  response        String?
+  respondedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status, recordType, createdAt])
+  @@index([documentNumber])
+}
+
+model Media {
+  id           String   @id @default(cuid())
+  filename     String   @unique
+  originalName String
+  path         String
+  url          String
+  mimeType     String
+  sizeBytes    Int
+  alt          String?
+  uploadedById String?
+  uploadedBy   User?    @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([uploadedById])
+  @@index([mimeType, createdAt])
+}
+
+model SiteSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  type        String   @default("text")
+  public      Boolean  @default(false)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

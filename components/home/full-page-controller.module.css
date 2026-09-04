@@ -1,0 +1,20 @@
+.section {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  scroll-margin-top: var(--wilo-home-header-height, 0px);
+}
+
+.footerSection {
+  display: grid;
+  align-items: center;
+  background: #050505;
+}
+
+@media (min-width: 1024px) and (pointer: fine) {
+  :global(html.wilo-fullpage) .footerSection {
+    height: calc(100svh - var(--wilo-home-header-height, 72px));
+    min-height: calc(100svh - var(--wilo-home-header-height, 72px));
+  }
+}

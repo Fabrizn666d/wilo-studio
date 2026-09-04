@@ -1,0 +1,125 @@
+.layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(calc(100% - 64px), 1580px);
+  min-height: min(860px, 76vw);
+  grid-template-columns: minmax(280px, .82fr) minmax(540px, 1.82fr) minmax(280px, .78fr);
+  align-items: center;
+  gap: clamp(30px, 3.5vw, 62px);
+  margin-inline: auto;
+}
+
+.selector { align-self: center; }
+.kicker { display: inline-flex; align-items: center; gap: 9px; color: #f1b824; font-size: 10px; letter-spacing: .14em; }
+.kicker::before { width: 24px; height: 1px; background: currentColor; content: ""; }
+.selector h2 { margin: 19px 0 20px; color: #f7f7f4; font-size: clamp(52px, 5.1vw, 82px); letter-spacing: -.068em; line-height: .88; }
+.selector h2 em { color: #f1b824; font-style: normal; }
+.selector > p { max-width: 340px; margin: 0; color: #959590; font-size: 14px; line-height: 1.7; }
+
+.projectList { position: relative; display: grid; margin-top: 36px; border-left: 1px solid rgba(255,255,255,.17); padding-left: 21px; }
+.projectList button {
+  position: relative;
+  display: grid;
+  min-height: 53px;
+  grid-template-columns: 32px 1fr;
+  align-items: center;
+  border: 0;
+  border-bottom: 0;
+  padding: 0;
+  background: transparent;
+  color: #686866;
+  text-align: left;
+  cursor: pointer;
+  transition: color 180ms ease, padding 180ms ease;
+}
+.projectList button:hover { color: #f7f7f4; padding-left: 4px; }
+.projectList button:focus-visible { outline: 2px solid #f1b824; outline-offset: 3px; }
+.projectList span { font-size: 9px; }
+.projectList strong { font-size: 13px; font-weight: 400; }
+.projectList i { position: absolute; top: 50%; left: -25px; width: 7px; height: 7px; border-radius: 50%; background: #393938; transform: translateY(-50%); }
+.projectList .activeButton { color: #f7f7f4; }
+.projectList .activeButton strong { font-weight: 700; }
+.projectList .activeButton i { background: #f1b824; box-shadow: 0 0 16px rgba(241,184,36,.8); }
+
+.visualColumn { position: relative; min-width: 0; padding: 42px 0 68px; }
+.visualGlow { position: absolute; right: 8%; bottom: 4%; left: 8%; height: 35%; border-radius: 50%; background: rgba(241,184,36,.08); filter: blur(55px); }
+.laptop { position: relative; z-index: 1; width: 100%; filter: drop-shadow(0 35px 38px rgba(0,0,0,.62)); }
+.display { position: relative; width: 95%; margin-inline: auto; border: 1px solid rgba(255,255,255,.38); border-radius: 25px 25px 9px 9px; padding: 12px 12px 14px; background: linear-gradient(145deg,#5c5e62,#0b0c0e 16%,#050505 78%,#383a3d); box-shadow: inset 0 1px 0 rgba(255,255,255,.26),0 32px 85px rgba(0,0,0,.68); }
+.camera { position: absolute; z-index: 3; top: 5px; left: 50%; width: 3px; height: 3px; border-radius: 50%; background: #111; box-shadow: 0 0 0 1px #343638; transform: translateX(-50%); }
+.screen { position: relative; aspect-ratio: 16/9; overflow: hidden; border-radius: 13px 13px 4px 4px; background: #0a0a0a; }
+.motionMedia, .previewMedia { position: absolute; inset: 0; }
+.previewPoster, .previewVideo { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.previewVideo { position: absolute; inset: 0; opacity: 0; transition: opacity 360ms ease; }
+.previewVideo[data-ready="true"] { opacity: 1; }
+.previewShade { position: absolute; inset: 0; background: linear-gradient(115deg,rgba(255,255,255,.08),transparent 25% 72%,rgba(241,184,36,.04)),linear-gradient(180deg,transparent 72%,rgba(0,0,0,.2)); box-shadow: inset 0 0 34px rgba(0,0,0,.32); pointer-events: none; }
+.base { position: relative; width: 105%; height: clamp(26px,2.8vw,44px); margin: -1px 0 0 -2.5%; clip-path: polygon(4% 0,96% 0,100% 68%,97% 100%,3% 100%,0 68%); background: linear-gradient(180deg,#85888c 0%,#343639 24%,#17181a 75%,#08090a 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.48),inset 0 -2px 0 rgba(0,0,0,.8); }
+.base::before { position: absolute; top: 0; left: 50%; width: 15%; height: 30%; border-radius: 0 0 12px 12px; background: rgba(5,5,5,.54); content: ""; transform: translateX(-50%); }
+.base span { position: absolute; right: 9%; bottom: 2px; left: 9%; height: 1px; background: rgba(255,255,255,.15); }
+.mediaNote { position: absolute; right: 0; bottom: 12px; color: #6f6f6c; font-size: 8px; letter-spacing: .15em; }
+
+.details { min-width: 0; align-self: center; border-left: 1px solid rgba(255,255,255,.1); padding-left: clamp(24px, 2.4vw, 42px); }
+.index { display: flex; align-items: center; gap: 9px; color: #f1b824; font-size: 11px; }
+.index i { width: 36px; height: 1px; background: rgba(255,255,255,.22); }
+.type { margin: 28px 0 0; color: #8c8c88; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.details h3 { margin: 12px 0 22px; color: #f7f7f4; font-size: clamp(36px,3.3vw,54px); letter-spacing: -.058em; line-height: .92; }
+.description { min-height: 88px; margin: 0; color: #a5a5a0; font-size: 13px; line-height: 1.7; }
+.tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 22px; }
+.tags span { border: 1px solid rgba(255,255,255,.14); border-radius: 3px; padding: 7px 9px; color: #c4c4bf; font-size: 9px; }
+.cta { display: flex; min-height: 51px; align-items: center; justify-content: space-between; margin-top: 24px; border: 1px solid #f1b824; border-radius: 4px; padding: 0 17px; background: #f1b824; color: #050505; font-size: 12px; font-weight: 700; text-decoration: none; transition: background 180ms ease,transform 180ms ease; }
+.cta:hover { background: #ffc83d; transform: translateY(-2px); }
+.cta:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+.navigation { display: flex; gap: 8px; margin-top: 13px; }
+.navigation button { display: grid; width: 40px; height: 40px; place-items: center; border: 1px solid rgba(241,184,36,.65); border-radius: 50%; background: transparent; color: #f1b824; cursor: pointer; transition: background 180ms ease,color 180ms ease; }
+.navigation button:hover { background: #f1b824; color: #050505; }
+.navigation button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+@media(max-width:1180px){
+  .layout { grid-template-columns: minmax(240px,.75fr) minmax(500px,1.5fr); }
+  .layout { min-height: 0; }
+  .details { display: grid; grid-column: 1/-1; grid-template-columns: .8fr 1fr auto; align-items: start; gap: 28px; border-left: 0; padding-left: 0; }
+  .details > div:first-child { display: contents; }
+  .index,.type,.details h3 { grid-column: 1; }
+  .type { margin-top: -14px; }
+  .details h3 { margin-top: -19px; }
+  .description,.tags { grid-column: 2; }
+  .description { grid-row: 1/span 2; }
+  .tags { margin-top: -22px; }
+  .cta { grid-column: 3; grid-row: 1; margin: 0; min-width: 190px; }
+  .navigation { grid-column: 3; grid-row: 2; margin-top: 0; }
+}
+
+@media(max-width:840px){
+  .layout { width: min(calc(100% - 36px),760px); grid-template-columns: minmax(0,1fr); }
+  .selector { min-width:0; }
+  .selector h2 { max-width: 560px; }
+  .selector > p { max-width: 600px; }
+  .projectList { display: flex; width:100%; max-width:100%; overflow-x: auto; border-left: 0; padding-left: 0; scrollbar-width: none; }
+  .projectList::-webkit-scrollbar { display:none; }
+  .projectList button { min-width: max-content; grid-template-columns: 24px auto; gap: 8px; border: 1px solid rgba(255,255,255,.12); padding: 0 14px; }
+  .projectList button + button { border-left: 0; }
+  .projectList i { display:none; }
+  .visualColumn { padding-top: 6px; }
+  .details { display:block; border-top:1px solid rgba(255,255,255,.1); padding:30px 0 0; }
+  .details > div:first-child { display:block; }
+  .details .index { display:flex; }
+  .details .type { margin:22px 0 0; }
+  .details h3 { margin:10px 0 18px; }
+  .description { min-height:0; margin:0; }
+  .tags { margin-top:20px; }
+  .cta { width:100%; margin-top:22px; }
+  .navigation { margin-top:12px; }
+}
+
+@media(max-width:520px){
+  .layout { width:calc(100% - 28px); }
+  .selector h2 { font-size: clamp(44px,14vw,62px); }
+  .display { width:96%; border-radius:16px 16px 6px 6px; padding:7px 7px 9px; }
+  .screen { border-radius:9px 9px 3px 3px; }
+  .details h3 { font-size:36px; }
+  .mediaNote { font-size:7px; }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .projectList button,.cta,.navigation button,.previewVideo{transition:none}
+}

@@ -1,4 +1,8 @@
 .next/
+.npm-cache/
+artifacts/
+.tmp/
+.codex-dev*.log
 node_modules/
 out/
 dist/
@@ -8,3 +12,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+*.tsbuildinfo
+prisma/*.db
+prisma/*.db-journal
+public/uploads/**
+!public/uploads/.gitkeep
+storage/**
+!storage/.gitkeep

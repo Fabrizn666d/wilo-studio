@@ -1,0 +1,136 @@
+export type ServiceShowcaseItem = {
+  slug: string;
+  number: string;
+  name: string;
+  shortName: string;
+  description: string;
+  color: string;
+  rgb: string;
+  image: string;
+  imageAlt: string;
+  features: readonly string[];
+};
+
+export const serviceShowcaseItems = [
+  {
+    slug: "webs-corporativas",
+    number: "01",
+    name: "Webs Corporativas",
+    shortName: "Webs corporativas",
+    description: "Sitios rápidos y administrables que convierten una marca en una presencia digital clara.",
+    color: "#3B82F6",
+    rgb: "59 130 246",
+    image: "/services/corporate-web/visual.webp",
+    imageAlt: "Laptop y teléfono mostrando proyectos web desarrollados por Wilo Studio",
+    features: ["Diseño a medida", "Administrable", "SEO técnico"],
+  },
+  {
+    slug: "tiendas-catalogos",
+    number: "02",
+    name: "Tiendas & Catálogos",
+    shortName: "Tiendas y catálogos",
+    description: "Catálogos y comercios digitales preparados para exhibir, vender y gestionar productos.",
+    color: "#FB7185",
+    rgb: "251 113 133",
+    image: "/services/ecommerce/visual.webp",
+    imageAlt: "Teléfono y laptop con una tienda digital de productos",
+    features: ["Productos y variantes", "Pedidos", "Pagos e integraciones"],
+  },
+  {
+    slug: "plataformas-sistemas",
+    number: "03",
+    name: "Plataformas & Sistemas",
+    shortName: "Plataformas y sistemas",
+    description: "Software operativo que conecta equipos, datos, clientes y decisiones en un solo lugar.",
+    color: "#7C3AED",
+    rgb: "124 58 237",
+    image: "/services/platforms/visual.webp",
+    imageAlt: "Laptop con plataforma CRM, paneles y analítica empresarial",
+    features: ["CRM y portales", "Dashboards", "Roles y permisos"],
+  },
+  {
+    slug: "cotizadores-configuradores",
+    number: "04",
+    name: "Cotizadores & Configuradores",
+    shortName: "Cotizadores y configuradores",
+    description: "Experiencias guiadas que convierten opciones complejas en propuestas comerciales precisas.",
+    color: "#14B8A6",
+    rgb: "20 184 166",
+    image: "/services/quotes/visual.webp",
+    imageAlt: "Laptop y teléfono mostrando un configurador de cotización por pasos",
+    features: ["Reglas de precio", "Configuración guiada", "Propuestas"],
+  },
+  {
+    slug: "automatizacion-apis",
+    number: "05",
+    name: "Automatización & APIs",
+    shortName: "Automatización y APIs",
+    description: "Integraciones que eliminan tareas repetitivas y mantienen cada parte del negocio conectada.",
+    color: "#65A30D",
+    rgb: "101 163 13",
+    image: "/services/automation/visual.webp",
+    imageAlt: "Estación de trabajo con flujos de automatización e integraciones API",
+    features: ["APIs", "Webhooks", "Notificaciones"],
+  },
+  {
+    slug: "identidad-diseno",
+    number: "06",
+    name: "Identidad & Diseño",
+    shortName: "Identidad y diseño",
+    description: "Sistemas visuales memorables y consistentes para productos, marcas y experiencias.",
+    color: "#F59E0B",
+    rgb: "245 158 11",
+    image: "/services/branding/visual.webp",
+    imageAlt: "Presentación de identidad con papelería, tarjetas, paleta y dispositivo",
+    features: ["Identidad visual", "UI design", "Sistemas de marca"],
+  },
+  {
+    slug: "produccion-audiovisual",
+    number: "07",
+    name: "Producción Audiovisual",
+    shortName: "Producción audiovisual",
+    description: "Fotografía, video y postproducción para comunicar productos, equipos y experiencias.",
+    color: "#E94B70",
+    rgb: "233 75 112",
+    image: "/services/audiovisual/visual.webp",
+    imageAlt: "Cámara cinematográfica profesional en un set de producción",
+    features: ["Foto y video", "Eventos", "Postproducción"],
+  },
+  {
+    slug: "infraestructura-digital",
+    number: "08",
+    name: "Infraestructura Digital",
+    shortName: "Infraestructura digital",
+    description: "Servidores, despliegues y seguridad para mantener cada solución disponible y protegida.",
+    color: "#0F766E",
+    rgb: "15 118 110",
+    image: "/services/infrastructure/visual.webp",
+    imageAlt: "Rack de servidores con paneles de seguridad y monitoreo cloud",
+    features: ["VPS y cloud", "SSL y dominios", "Despliegues"],
+  },
+  {
+    slug: "correos-corporativos",
+    number: "09",
+    name: "Correos Corporativos",
+    shortName: "Correos corporativos",
+    description: "Correo profesional con dominio propio, sincronización, seguridad y acceso multidispositivo.",
+    color: "#0891B2",
+    rgb: "8 145 178",
+    image: "/services/corporate-email/visual.webp",
+    imageAlt: "Laptop y teléfono sincronizados con una bandeja de correo corporativo",
+    features: ["Dominio propio", "Web y móvil", "Protección antispam"],
+  },
+  {
+    slug: "soporte-evolucion",
+    number: "10",
+    name: "Soporte & Evolución",
+    shortName: "Soporte y evolución",
+    description: "Monitoreo, mantenimiento y mejoras continuas después del lanzamiento del producto.",
+    color: "#84CC16",
+    rgb: "132 204 22",
+    image: "/services/support/visual.webp",
+    imageAlt: "Monitor y tablet con métricas de salud, actualizaciones y soporte",
+    features: ["Monitoreo", "Actualizaciones", "Mejora continua"],
+  },
+] as const satisfies readonly ServiceShowcaseItem[];
+

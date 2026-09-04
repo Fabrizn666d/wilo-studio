@@ -6,25 +6,43 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit --incremental false",
+    "db:generate": "prisma generate",
+    "db:generate:prod": "prisma generate --schema prisma/schema.postgresql.prisma",
+    "db:push": "prisma db push",
+    "db:migrate:deploy": "prisma migrate deploy --schema prisma/schema.postgresql.prisma",
+    "db:migrate:status": "prisma migrate status --schema prisma/schema.postgresql.prisma",
+    "db:seed": "node prisma/seed.mjs",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@prisma/client": "^6.19.3",
     "@tailwindcss/postcss": "^4.1.18",
+    "@types/nodemailer": "^7.0.12",
+    "bcryptjs": "^3.0.3",
+    "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.26",
     "gsap": "^3.14.2",
     "lenis": "^1.3.15",
     "lucide-react": "^0.561.0",
-    "next": "^16.0.10",
+    "next": "15.5.20",
+    "next-auth": "^4.24.15",
+    "nodemailer": "^7.0.13",
+    "prisma": "^6.19.3",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^24.10.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.39.2",
-    "eslint-config-next": "^16.0.10",
+    "eslint-config-next": "15.5.20",
+    "playwright": "^1.61.1",
     "typescript": "^5.9.3"
   }
 }
