@@ -1,0 +1,30 @@
+.section{isolation:isolate;overflow:clip;background:#f3f1eb;color:#15212a;font-family:var(--font-flexo);}
+.frame{height:100%;display:flex;flex-direction:column;}
+.topline{display:flex;justify-content:space-between;gap:18px;padding-bottom:20px;border-bottom:1px solid #ced0cb;color:#536361;font-size:10px;letter-spacing:.17em;font-weight:700;}
+.composition{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(25px,4vw,70px);flex:1;min-height:0;padding-block:28px;}
+.copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-width:0;}
+.origin{display:flex;align-items:center;gap:8px;color:#377b80;letter-spacing:.14em;font-size:10px;font-weight:700;}
+.origin svg{width:16px;height:16px;}
+.copy h2{margin:20px 0;font-size:clamp(42px,4.3vw,74px);letter-spacing:-.058em;line-height:.99;font-weight:700;}
+.copy h2 em{color:#568487;font-style:normal;}
+.copy p{max-width:480px;color:#596564;font-size:clamp(13px,1vw,16px);line-height:1.6;margin:0;}
+.link{display:inline-flex;align-items:center;gap:28px;min-height:44px;margin-top:15px;border-bottom:1px solid #7c9391;font-size:13px;color:#223e42;text-decoration:none;}
+.link svg{width:18px;transition:transform .3s;}.link:hover svg{transform:translate(3px,-3px);}.link:focus-visible{outline:2px solid #21626a;outline-offset:4px;}
+.photograph{position:relative;min-height:390px;margin:0;overflow:hidden;border-radius:2px 70px 2px 2px;background:#c3c9c4;}
+.photoSurface{position:absolute;inset:-12px;}
+.photoSurface img{object-fit:cover;object-position:77% center;}
+.photograph::after{position:absolute;inset:50% 0 0;background:linear-gradient(transparent,#15232ac9);content:"";pointer-events:none;}
+.photograph figcaption{position:absolute;z-index:1;inset:auto 25px 24px;display:flex;justify-content:space-between;align-items:end;color:white;}
+.photograph figcaption>span:first-child{font-size:10px;letter-spacing:.2em;line-height:1.7;}
+.photograph figcaption>span:last-child{font-family:var(--font-handwritten),cursive;font-size:clamp(25px,3vw,45px);line-height:1;transform:rotate(-5deg);}
+.photograph figcaption em{font-style:normal;}
+.intentions{display:grid;grid-template-columns:1fr 1fr .65fr;gap:30px;padding:23px 0;border-top:1px solid #c9ceca;}
+.intentions article+article,.signature{padding-left:30px;border-left:1px solid #c9ceca;}
+.intentions article>span{font-size:10px;color:#497174;letter-spacing:.15em;font-weight:700;}
+.intentions p{max-width:500px;margin:8px 0 0;font-size:13px;color:#51605e;line-height:1.5;}
+.signature{display:flex;flex-direction:column;justify-content:center;font-size:clamp(18px,2vw,30px);line-height:1.2;letter-spacing:-.035em;}.signature strong{color:#437d7d;}
+.values{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 20px;padding:17px 0 0;margin:0;border-top:1px solid #c9ceca;list-style:none;color:#546d6c;text-transform:uppercase;font-size:10px;font-weight:700;letter-spacing:.13em;}
+@media(min-width:1024px) and (pointer:fine){.composition{padding-block:22px}.photograph{min-height:0}.copy h2{font-size:clamp(40px,4.1vw,67px);margin:13px 0}.copy p{font-size:13px}.intentions{padding-block:17px}.topline{padding-bottom:16px}}
+@media(min-width:1024px) and (max-height:800px) and (pointer:fine){.copy h2{font-size:42px}.composition{padding-block:17px}.copy p{font-size:12px;line-height:1.45}.link{margin-top:7px}.intentions{gap:22px;padding-block:14px}.intentions p{font-size:12px}.values{padding-top:13px}}
+@media(max-width:900px){.composition{grid-template-columns:1fr;gap:30px}.copy h2{font-size:clamp(44px,7.5vw,70px)}.photograph{min-height:380px}.intentions{grid-template-columns:1fr 1fr}.signature{display:none}.topline>span:last-child{font-size:8px}.copy p{font-size:15px}}
+@media(max-width:540px){.photograph{min-height:350px;border-top-right-radius:45px}.intentions{grid-template-columns:1fr;gap:20px}.intentions article+article{border:0;padding:0}.values{justify-content:flex-start;font-size:9px}.copy h2{font-size:clamp(35px,10.5vw,52px)}.photograph figcaption{inset:auto 18px 18px}.topline{font-size:9px}}

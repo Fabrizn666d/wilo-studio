@@ -7,6 +7,8 @@
   min-width: 0;
   background: #050505;
   color: #f7f7f4;
+  --home-frame-wide: 1740px;
+  font-family: var(--font-flexo);
 }
 
 .section::before {
@@ -14,12 +16,12 @@
   z-index: -3;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(5,5,5,.97) 0%, rgba(5,5,5,.78) 28%, rgba(5,5,5,.79) 67%, #050505 100%),
-    linear-gradient(90deg, #050505 0%, transparent 38%, transparent 70%, #050505 100%),
-    url("/images/wilo/hero/misti.webp") center 43% / cover no-repeat;
+    linear-gradient(180deg, rgba(4,12,22,.93) 0%, rgba(4,10,19,.68) 28%, rgba(5,11,20,.8) 67%, #050b12 100%),
+    linear-gradient(90deg, #050c16 0%, transparent 38%, transparent 80%, #050b15 100%),
+    url("/images/wilo/generated/about-arequipa-v2.webp") 73% 70% / cover no-repeat;
   content: "";
-  filter: saturate(.55) sepia(.25);
-  opacity: .86;
+  filter: saturate(.68);
+  opacity: 1;
 }
 
 .section::after {
@@ -49,7 +51,7 @@
 .eyebrow b { color: var(--process-yellow); font-weight: 500; }
 .eyebrow > i { display: block; width: 64px; height: 1px; background: linear-gradient(90deg, transparent, rgba(241,184,36,.6)); }
 .eyebrow > i:last-child { transform: scaleX(-1); }
-.header h2 { margin: 20px 0 13px; font-size: clamp(56px, 6.2vw, 108px); font-weight: 700; letter-spacing: -.065em; line-height: .89; }
+.header h2 { margin: 20px 0 13px; font-size: clamp(56px, 6.2vw, 108px); font-weight: 700; letter-spacing: -.065em; line-height: .99; background: linear-gradient(105deg,#fff 50%,#f5d693); background-clip:text; -webkit-background-clip:text; color:transparent; }
 .header p { margin: 0; color: #aaa8a2; font-size: clamp(14px, 1.2vw, 18px); line-height: 1.55; }
 
 .journey { position: relative; min-width: 0; margin-top: clamp(70px, 7vw, 112px); }
@@ -72,6 +74,8 @@
 .verticalTrack { display: none; }
 
 .processVisual { position: relative; display: grid; width: 100%; height: 156px; min-width: 0; align-self: end; align-items: end; justify-items: center; opacity: .54; filter: saturate(.55); transform: translateY(5px) scale(.94); transform-origin: center bottom; transition: opacity .45s ease, filter .45s ease, transform .55s cubic-bezier(.22,1,.36,1); }
+.section[data-process-entered="true"] .processVisual { opacity:1; filter:saturate(1); transform:translateY(0) scale(1); }
+.section[data-process-entered="true"] .stepContent p { color:#b9bdc4; }
 .step[data-state="current"] .processVisual,.step[data-state="complete"] .processVisual { opacity: 1; filter: saturate(1); transform: translateY(0) scale(1); }
 .step[data-state="current"] .processVisual { filter: saturate(1.1) drop-shadow(0 12px 25px rgba(241,184,36,.13)); }
 
@@ -225,13 +229,13 @@
   :global(html.wilo-fullpage) .header h2 { margin: 10px 0 7px; font-size: clamp(48px, 5vw, 78px); }
   :global(html.wilo-fullpage) .header p { font-size: 12px; }
   :global(html.wilo-fullpage) .journey { margin-top: clamp(25px, 4svh, 42px); }
-  :global(html.wilo-fullpage) .step { grid-template-rows: 132px 42px auto; }
-  :global(html.wilo-fullpage) .processVisual { height: 122px; transform: translateY(5px) scale(.88); }
-  :global(html.wilo-fullpage) .horizontalTrack { top: 153px; }
+  :global(html.wilo-fullpage) .step { grid-template-rows: 165px 48px auto; }
+  :global(html.wilo-fullpage) .processVisual { height: 155px; transform: translateY(0) scale(1); }
+  :global(html.wilo-fullpage) .horizontalTrack { top: 189px; }
   :global(html.wilo-fullpage) .marker { width: 24px; height: 24px; }
   :global(html.wilo-fullpage) .stepContent { padding-top: 10px; }
-  :global(html.wilo-fullpage) .stepContent h3 { font-size: clamp(12px, 1.1vw, 16px); }
-  :global(html.wilo-fullpage) .stepContent p { margin-top: 8px; font-size: clamp(8px, .63vw, 10px); line-height: 1.45; }
+  :global(html.wilo-fullpage) .stepContent h3 { font-size: clamp(13px, 1.15vw, 18px); }
+  :global(html.wilo-fullpage) .stepContent p { margin-top: 8px; font-size: clamp(10px, .8vw, 13px); line-height: 1.5; }
   :global(html.wilo-fullpage) .closing { margin-top: clamp(22px, 3svh, 35px); }
   :global(html.wilo-fullpage) .scrollCue { margin-top: 15px; }
 }

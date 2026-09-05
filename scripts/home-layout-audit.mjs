@@ -17,6 +17,7 @@ const viewports = [
 
 const selectors = [
   ["hero", "main > section:first-of-type"],
+  ["about-wilo", "#sobre-wilo"],
   ["work", "#trabajos"],
   ["services", "#servicios"],
   ["lab", "#lab"],

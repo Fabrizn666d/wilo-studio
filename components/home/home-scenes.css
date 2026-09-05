@@ -1,0 +1,23 @@
+/* Deliberately excludes the approved Hero, including its inherited typography. */
+main > [data-fullpage-section]:not([data-fullpage-section="hero"]) {
+  font-family: var(--font-flexo);
+}
+main > [data-fullpage-section]:not([data-fullpage-section="hero"]) [data-parallax] {
+  transition: translate 650ms cubic-bezier(.16,1,.3,1);
+}
+[data-home-navigation][data-scene-tone="light"] {
+  background: rgba(250,250,248,.94);
+  color: #091322;
+  border-bottom-color: rgba(16,35,57,.09);
+  box-shadow: 0 2px 18px rgba(21,35,58,.025);
+}
+[data-home-navigation][data-scene-tone="light"] nav a { color:#344155; }
+[data-home-navigation][data-scene-tone="light"] nav a:hover,
+[data-home-navigation][data-scene-tone="light"] nav a[aria-current="location"] { color:#060f1b; }
+[data-home-navigation][data-scene-tone="light"] [data-wilo-logo-target] img { filter:brightness(0); }
+[data-home-navigation][data-scene-tone="light"] [aria-label="Idioma: español"] { color:#172438; }
+[data-home-navigation][data-scene-tone="light"] button[aria-controls="hero-mobile-navigation"] { color:#172438; border-color:#17243833; }
+[data-home-navigation][data-scene-tone="light"] button[aria-controls="hero-mobile-navigation"] span { background:#172438; }
+@media(prefers-reduced-motion:reduce) {
+  main > [data-fullpage-section]:not([data-fullpage-section="hero"]) [data-parallax] { translate:none!important; transition:none; }
+}

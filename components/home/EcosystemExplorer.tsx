@@ -13,6 +13,7 @@ import {
   Monitor,
   MonitorSmartphone,
   ShieldCheck,
+  ShoppingBag,
   Volume2,
   Zap,
 } from "lucide-react";
@@ -84,9 +85,9 @@ export function EcosystemExplorer({ lines }: { lines: readonly EcosystemLine[] }
     <div ref={rootRef} className={`${styles.showcase} ${ready ? styles.ready : ""} ${visible ? styles.visible : ""}`}>
       <header className={`${styles.heading} ${styles.reveal}`}>
         <div className={styles.headingCopy}>
-          <span className={styles.eyebrow}><i />08 · ECOSISTEMA WILO</span>
-          <h2 id="ecosystem-title">UNA MARCA.<br />CUATRO FORMAS <em>DE CREAR.</em></h2>
-          <p>Tecnología, educación, soluciones rápidas y experiencias corporativas conectadas bajo una misma visión.</p>
+          <span className={styles.eyebrow}><i />10 · ECOSISTEMA WILO</span>
+          <h2 id="ecosystem-title">UNA MARCA.<br />CINCO FORMAS <em>DE CREAR.</em></h2>
+          <p>Tecnología, educación, experiencias y equipamiento conectados bajo una misma visión.</p>
         </div>
         <span className={styles.giantW} aria-hidden="true">W</span>
         <span className={styles.dotField} aria-hidden="true" />
@@ -147,13 +148,12 @@ export function EcosystemExplorer({ lines }: { lines: readonly EcosystemLine[] }
         </article>
       </div>
 
-      <footer className={`${styles.footerBar} ${styles.reveal}`} style={{ "--delay": "440ms" } as CSSProperties}>
-        <Image src="/brand/wilo-mark.png" alt="Wilo" width={48} height={48} />
-        <strong>UN ECOSISTEMA, INFINITAS POSIBILIDADES.</strong>
-        <i aria-hidden="true" />
-        <p>Cuatro líneas de servicio, un mismo compromiso: crear soluciones que transforman ideas en resultados reales.</p>
-        <Link href="/contacto">Conoce todo nuestro ecosistema <ArrowUpRight aria-hidden="true" /></Link>
-      </footer>
+      <article className={`${styles.storeBand} ${styles.reveal}`} style={{ "--delay": "440ms" } as CSSProperties}>
+        <div className={styles.storeIdentity}><span>05 · EQUIPAMIENTO</span><h3>Wilo <em>Store</em></h3></div>
+        <p>Tecnología para trabajar, crear y crecer.<br /><span>Equipos · Componentes · Periféricos · Software</span></p>
+        <ShoppingBag className={styles.storeGraphic} aria-hidden="true" />
+        <Link href={href("store", "/tienda")}>Explorar catálogo <ArrowUpRight aria-hidden="true" /></Link>
+      </article>
     </div>
   );
 }

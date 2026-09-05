@@ -96,8 +96,16 @@ export function HeroNavigation() {
     </Link>
   );
 
+  const labTheme = activeSection === "lab";
+  const lightScene = scrolled && ["sobre-wilo", "servicios", "audiovisual", "confianza", "tecnologia", "store", "ecosistema", "nosotros", "internacional", "pie-de-pagina"].includes(activeSection);
+
   return (
-    <header className={`${styles.navigation} ${scrolled ? styles.navigationScrolled : ""}`} data-home-navigation>
+    <header
+      className={`${styles.navigation} ${scrolled ? styles.navigationScrolled : ""} ${labTheme ? styles.navigationLab : ""}`}
+      data-home-navigation
+      data-theme={labTheme ? "lab" : "default"}
+      data-scene-tone={lightScene ? "light" : "dark"}
+    >
       <div className={styles.navigationInner}>
         {logo}
         <nav className={styles.desktopNavigation} aria-label="Navegación del inicio">

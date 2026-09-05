@@ -153,7 +153,7 @@ for (const viewport of desktopViewports) {
   const slowProgressiveReverse = await sectionState();
 
   if (captureScreenshots && viewport.width !== 1920) {
-    for (const id of ["trabajos", "servicios", "lab", "audiovisual", "proceso", "confianza", "ecosistema", "nosotros", "contacto-home", "pie-de-pagina"]) {
+    for (const id of ["sobre-wilo", "trabajos", "servicios", "lab", "audiovisual", "proceso", "confianza", "ecosistema", "nosotros", "contacto-home", "pie-de-pagina"]) {
       await page.locator(`#${id}`).screenshot({ path: `${screenshotDirectory}/${id}-${viewport.width}x${viewport.height}.png` });
     }
   }

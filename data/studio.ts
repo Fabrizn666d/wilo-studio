@@ -170,7 +170,8 @@ export const labModules = [
   { key: "crm", label: "CRM", description: "Contactos, oportunidades, notas y próximos pasos conectados." },
   { key: "quote", label: "Cotizador", description: "Selección guiada, reglas y resumen de solicitud en un solo flujo." },
   { key: "tracking", label: "Tracking", description: "Estados y seguimiento para que cada parte sepa qué ocurre." },
-  { key: "api", label: "API", description: "Servicios que intercambian datos de forma controlada y mantenible." },
+  { key: "api", label: "API & Automatización", description: "Servicios y flujos que intercambian datos sin tareas repetitivas." },
+  { key: "reports", label: "Reportes & Inteligencia", description: "Señales, comparaciones y resultados convertidos en decisiones claras." },
 ] as const;
 
 export const audiovisualServices = [
@@ -214,6 +215,7 @@ export const ecosystemLines = [
   { key: "express", name: "Wilo Express", eyebrow: "Web rápida para negocios", description: "Una presencia profesional, administrable y lista para operar con una estructura probada.", href: "/express", accent: "#71A7FF" },
   { key: "education", name: "Wilo Education", eyebrow: "Tecnología que se aprende", description: "Robótica, construcción y experiencias STEM para instituciones y estudiantes.", href: "/education", accent: "#8F6BFF" },
   { key: "events", name: "Wilo Events", eyebrow: "Experiencias corporativas", description: "Producción audiovisual e infraestructura técnica para encuentros de marca.", href: "/events", accent: "#FF7A45" },
+  { key: "store", name: "Wilo Store", eyebrow: "Tecnología para crear", description: "Equipos, componentes, periféricos y software para tus proyectos.", href: "/tienda", accent: "#2674E8" },
 ] as const;
 
 export const aboutWilo = {

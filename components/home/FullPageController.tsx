@@ -106,6 +106,9 @@ export function FullPageController({ children }: { children: ReactNode }) {
     let lockedUntil = 0;
     let animating = false;
     let observer: IntersectionObserver | null = null;
+    let headerHeight = 72;
+    let headerTimer = 0;
+    const header = document.querySelector<HTMLElement>("[data-home-navigation]");
     const previousScrollRestoration = window.history.scrollRestoration;
     window.history.scrollRestoration = "manual";
 
@@ -113,7 +116,7 @@ export function FullPageController({ children }: { children: ReactNode }) {
       desktopEnabled = desktopMedia.matches;
       root.classList.toggle("wilo-fullpage", desktopEnabled);
       root.classList.toggle("wilo-native-sections", !desktopEnabled);
-      root.style.setProperty("--wilo-home-header-height", desktopEnabled ? "72px" : "0px");
+      root.style.setProperty("--wilo-home-header-height", desktopEnabled ? `${headerHeight}px` : "0px");
       setEnabled(desktopEnabled);
       accumulator = 0;
       accumulatorDirection = 0;
@@ -121,7 +124,7 @@ export function FullPageController({ children }: { children: ReactNode }) {
 
     const targetTop = (section: HTMLElement, index: number) => {
       const absoluteTop = section.getBoundingClientRect().top + window.scrollY;
-      const headerOffset = index === 0 ? 0 : 72;
+      const headerOffset = index === 0 ? 0 : headerHeight;
       return Math.max(0, Math.round(absoluteTop - headerOffset));
     };
 
@@ -295,7 +298,7 @@ export function FullPageController({ children }: { children: ReactNode }) {
           setActive(index);
           if (desktopEnabled) updateHistory(visible.target as HTMLElement, "replace");
         }
-      }, { rootMargin: desktopEnabled ? "-72px 0px -28% 0px" : "0px", threshold: [0.2, 0.4, 0.6, 0.8] });
+      }, { rootMargin: desktopEnabled ? `-${headerHeight}px 0px -28% 0px` : "0px", threshold: [0.2, 0.4, 0.6, 0.8] });
       getSections().forEach((section) => observer?.observe(section));
     };
 
@@ -311,6 +314,20 @@ export function FullPageController({ children }: { children: ReactNode }) {
 
     updateMode();
     connectObserver();
+    // Remember the compact header's measured height; the approved Hero retains
+    // its expanded header without changing the scene height on every scroll.
+    const headerObserver = new ResizeObserver(() => {
+      window.clearTimeout(headerTimer);
+      headerTimer = window.setTimeout(() => {
+        if (!header || window.scrollY <= 24) return;
+        const measured = Math.round(header.getBoundingClientRect().height);
+        if (measured <= 0 || measured === headerHeight) return;
+        headerHeight = measured;
+        root.style.setProperty("--wilo-home-header-height", desktopEnabled ? `${headerHeight}px` : "0px");
+        connectObserver();
+      }, 320);
+    });
+    if (header) headerObserver.observe(header);
     const initialId = decodeURIComponent(window.location.hash.slice(1));
     const initialIndex = initialId
       ? getSections().findIndex((section) => sectionId(section) === initialId)
@@ -333,6 +350,8 @@ export function FullPageController({ children }: { children: ReactNode }) {
       window.clearTimeout(animationTimer);
       window.clearTimeout(resizeTimer);
       observer?.disconnect();
+      headerObserver.disconnect();
+      window.clearTimeout(headerTimer);
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("popstate", onHistoryNavigation);

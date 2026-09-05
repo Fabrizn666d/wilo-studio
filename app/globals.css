@@ -24,7 +24,7 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 110px; scrollbar-gutter: stable; background: var(--black); }
-body { margin: 0; overflow-x: hidden; background: var(--cream); color: var(--black); font-family: var(--font-inter); text-rendering: optimizeLegibility; }
+body { margin: 0; overflow-x: hidden; background: var(--cream); color: var(--black); font-family: var(--font-flexo); text-rendering: optimizeLegibility; }
 
 html.wilo-fullpage { scroll-behavior: auto !important; scroll-padding-top: 0; }
 html.wilo-fullpage body { overscroll-behavior-y: none; }

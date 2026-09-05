@@ -11,9 +11,10 @@ const flexo = localFont({
     { path: "./fonts/flexo-regular.ttf", style: "normal", weight: "400" },
     { path: "./fonts/flexo-bold.ttf", style: "normal", weight: "700" },
   ],
+  adjustFontFallback: false,
   display: "swap",
   variable: "--font-flexo",
-  fallback: ["Arial", "sans-serif"],
+  fallback: [],
 });
 
 export const metadata: Metadata = {
