@@ -109,7 +109,6 @@ const clientMarks = [
 ] as const;
 
 const reachItems = [
-  { title: "Arequipa", text: "Nuestro origen", icon: MapPin, color: "#3978f6" },
   { title: "Todo el Perú", text: "Nuestra cobertura nacional", icon: MapPin, color: "#14b8a6" },
   { title: "Todo el mundo", text: "Soluciones digitales sin fronteras", icon: Globe2, color: "#7c4dff" },
   { title: "Ideas que funcionan", text: "Nuestra esencia", icon: Lightbulb, color: "#ff5d73" },
@@ -135,6 +134,8 @@ export function AboutWiloShowcase() {
   const wheelResetTimer = useRef<number | null>(null);
   const wheelDistance = useRef(0);
   const countFrame = useRef<number | null>(null);
+  const countDelayTimer = useRef<number | null>(null);
+  const openingTimer = useRef<number | null>(null);
   const hasCounted = useRef(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [dragX, setDragX] = useState(0);
@@ -144,6 +145,8 @@ export function AboutWiloShowcase() {
   const [coolingDown, setCoolingDown] = useState(false);
   const [compactViewport, setCompactViewport] = useState(false);
   const [sectionActive, setSectionActive] = useState(false);
+  const [motionReady, setMotionReady] = useState(false);
+  const [sceneOpening, setSceneOpening] = useState(false);
   const [countStarted, setCountStarted] = useState(false);
   const [countValues, setCountValues] = useState<number[]>(stats.map(() => 0));
   const motionPaused = hovered || focused || dragging || coolingDown || !sectionActive;
@@ -158,6 +161,10 @@ export function AboutWiloShowcase() {
   }, []);
 
   useEffect(() => {
+    setMotionReady(true);
+  }, []);
+
+  useEffect(() => {
     const media = window.matchMedia("(max-width: 760px)");
     const update = () => setCompactViewport(media.matches);
     update();
@@ -168,18 +175,28 @@ export function AboutWiloShowcase() {
   useEffect(() => {
     const section = rootRef.current;
     if (!section) return;
+    let intersectionRatio = 0;
+    let markedActive = section.dataset.fullpageActive === "true";
+    const syncSceneState = () => {
+      const fullpage = document.documentElement.classList.contains("wilo-fullpage");
+      // FullPageController marks the destination at the beginning of its
+      // transition. Waiting for real visibility keeps the reveal observable
+      // after the Hero instead of completing while the section is off-screen.
+      const active = fullpage
+        ? markedActive && intersectionRatio >= 0.62
+        : intersectionRatio >= 0.28;
+      setSectionActive(active);
+    };
     const updateFullpageState = () => {
-      if (document.documentElement.classList.contains("wilo-fullpage")) {
-        setSectionActive(section.dataset.fullpageActive === "true");
-      }
+      markedActive = section.dataset.fullpageActive === "true";
+      syncSceneState();
     };
     const mutation = new MutationObserver(updateFullpageState);
     mutation.observe(section, { attributes: true, attributeFilter: ["data-fullpage-active"] });
     const intersection = new IntersectionObserver(([entry]) => {
-      if (!document.documentElement.classList.contains("wilo-fullpage")) {
-        setSectionActive(entry.isIntersecting && entry.intersectionRatio >= 0.28);
-      }
-    }, { threshold: [0.28, 0.45] });
+      intersectionRatio = entry.isIntersecting ? entry.intersectionRatio : 0;
+      syncSceneState();
+    }, { threshold: [0, 0.28, 0.45, 0.62, 0.78] });
     intersection.observe(section);
     updateFullpageState();
     return () => {
@@ -189,22 +206,50 @@ export function AboutWiloShowcase() {
   }, []);
 
   useEffect(() => {
+    if (openingTimer.current !== null) window.clearTimeout(openingTimer.current);
+    if (!sectionActive || reducedMotion) {
+      setSceneOpening(false);
+      return;
+    }
+    setSceneOpening(true);
+    openingTimer.current = window.setTimeout(() => setSceneOpening(false), 1500);
+  }, [reducedMotion, sectionActive]);
+
+  useEffect(() => {
     if (!sectionActive || hasCounted.current) return;
-    hasCounted.current = true;
-    setCountStarted(true);
     if (reducedMotion) {
+      hasCounted.current = true;
+      setCountStarted(true);
       setCountValues(stats.map((stat) => stat.value));
       return;
     }
-    const startedAt = performance.now();
-    const duration = 1250;
-    const tick = (now: number) => {
-      const progress = Math.min(1, (now - startedAt) / duration);
-      const eased = 1 - Math.pow(1 - progress, 4);
-      setCountValues(stats.map((stat) => Math.round(stat.value * eased)));
-      if (progress < 1) countFrame.current = window.requestAnimationFrame(tick);
+    countDelayTimer.current = window.setTimeout(() => {
+      hasCounted.current = true;
+      setCountStarted(true);
+      setCountValues(stats.map(() => 0));
+      // Keep the zero state on screen briefly so the count-up has a readable
+      // origin instead of jumping on the very first painted frame.
+      const startedAt = performance.now() + 300;
+      const durations = [1900, 1050, 900, 1400];
+      const tick = (now: number) => {
+        let running = false;
+        const values = stats.map((stat, index) => {
+          const progress = Math.max(0, Math.min(1, (now - startedAt) / durations[index]));
+          if (progress < 1) running = true;
+          const eased = 1 - Math.pow(1 - progress, 3);
+          return Math.round(stat.value * eased);
+        });
+        setCountValues(values);
+        if (running) countFrame.current = window.requestAnimationFrame(tick);
+      };
+      countFrame.current = window.requestAnimationFrame(tick);
+    }, 720);
+    return () => {
+      if (!hasCounted.current && countDelayTimer.current !== null) {
+        window.clearTimeout(countDelayTimer.current);
+        countDelayTimer.current = null;
+      }
     };
-    countFrame.current = window.requestAnimationFrame(tick);
   }, [reducedMotion, sectionActive]);
 
   useEffect(() => {
@@ -216,12 +261,28 @@ export function AboutWiloShowcase() {
   useEffect(() => () => {
     if (cooldownTimer.current !== null) window.clearTimeout(cooldownTimer.current);
     if (wheelResetTimer.current !== null) window.clearTimeout(wheelResetTimer.current);
+    if (countDelayTimer.current !== null) window.clearTimeout(countDelayTimer.current);
+    if (openingTimer.current !== null) window.clearTimeout(openingTimer.current);
     if (countFrame.current !== null) window.cancelAnimationFrame(countFrame.current);
   }, []);
 
   const runControl = (action: () => void) => {
     action();
     resumeAfterInteraction();
+  };
+
+  const onScenePointerMove = (event: PointerEvent<HTMLElement>) => {
+    if (reducedMotion || compactViewport || dragging) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 10;
+    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 8;
+    event.currentTarget.style.setProperty("--about-parallax-x", `${x.toFixed(2)}px`);
+    event.currentTarget.style.setProperty("--about-parallax-y", `${y.toFixed(2)}px`);
+  };
+
+  const resetSceneParallax = () => {
+    rootRef.current?.style.setProperty("--about-parallax-x", "0px");
+    rootRef.current?.style.setProperty("--about-parallax-y", "0px");
   };
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -279,7 +340,12 @@ export function AboutWiloShowcase() {
       className={styles.section}
       data-counted={countStarted}
       data-active={sectionActive}
+      data-entered={sectionActive}
+      data-motion-ready={motionReady}
+      data-opening={sceneOpening}
       id="sobre-wilo"
+      onPointerLeave={resetSceneParallax}
+      onPointerMove={onScenePointerMove}
       ref={rootRef}
       spacing="scene"
     >
@@ -380,8 +446,7 @@ export function AboutWiloShowcase() {
           })}
         </div>
 
-        <div className={styles.clientMarquee} aria-label="Marcas y proyectos verificados de Wilo Studio">
-          <p>MARCAS Y PROYECTOS<br />QUE CONFÍAN EN WILO</p>
+        <div className={styles.clientMarquee} aria-label="Carrusel infinito de marcas y proyectos de Wilo Studio">
           <div className={styles.marqueeViewport}>
             <div className={styles.marqueeTrack}>
               {[...clientMarks, ...clientMarks].map((item, index) => (
