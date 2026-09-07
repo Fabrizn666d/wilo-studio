@@ -17,7 +17,6 @@ import {
   type CSSProperties,
   type PointerEvent,
   type WheelEvent,
-  useCallback,
   useEffect,
   useRef,
   useState,
@@ -32,7 +31,7 @@ const capabilities = [
     number: "01",
     name: "Desarrollo web",
     description: "Sitios corporativos · Tiendas · Plataformas · Apps",
-    image: "/services/corporate-web/visual.webp",
+    image: "/ecosystem/studio/studio-devices.png",
     alt: "Composición de soluciones web creadas por Wilo Studio",
     color: "#3978f6",
   },
@@ -109,12 +108,26 @@ const clientMarks = [
 ] as const;
 
 const reachItems = [
+  { title: "Arequipa", text: "Nuestro origen", icon: MapPin, color: "#3978f6" },
   { title: "Todo el Perú", text: "Nuestra cobertura nacional", icon: MapPin, color: "#14b8a6" },
   { title: "Todo el mundo", text: "Soluciones digitales sin fronteras", icon: Globe2, color: "#7c4dff" },
   { title: "Ideas que funcionan", text: "Nuestra esencia", icon: Lightbulb, color: "#ff5d73" },
 ] as const;
 
 const visualOrder = [2, 1, 0, 3, 4, 5];
+const INITIAL_PHASE = 2;
+const CARD_TRAVEL_MS = 7200;
+const SNAP_STIFFNESS = 190;
+const SNAP_DAMPING = 26;
+
+function wrapOffset(value: number) {
+  const length = capabilities.length;
+  return ((value + length / 2) % length + length) % length - length / 2;
+}
+
+function easeOutCubic(progress: number) {
+  return 1 - Math.pow(1 - progress, 3);
+}
 
 function relativePosition(index: number, activeIndex: number) {
   const length = capabilities.length;
@@ -126,39 +139,33 @@ function relativePosition(index: number, activeIndex: number) {
 export function AboutWiloShowcase() {
   const reducedMotion = useHydratedReducedMotion();
   const rootRef = useRef<HTMLElement | null>(null);
-  const pointerStart = useRef<number | null>(null);
-  const pointerSlideIndex = useRef<number | null>(null);
-  const pointerVelocity = useRef({ x: 0, time: 0, velocity: 0 });
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+  const cardRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const pointer = useRef({ id: -1, startX: 0, startPhase: INITIAL_PHASE, x: 0, time: 0, velocityX: 0 });
+  const phaseRef = useRef(INITIAL_PHASE);
+  const phaseVelocityRef = useRef(0);
+  const phaseTargetRef = useRef<number | null>(null);
+  const resumeAtRef = useRef(0);
+  const sceneProgressRef = useRef(0);
+  const sceneNearRef = useRef(false);
+  const interactionPausedRef = useRef(false);
+  const hoverSlowRef = useRef(false);
+  const parallaxRef = useRef({ x: 0, y: 0 });
+  const carouselFrame = useRef<number | null>(null);
+  const renderCarouselRef = useRef<() => void>(() => undefined);
   const suppressClick = useRef(false);
-  const cooldownTimer = useRef<number | null>(null);
-  const wheelResetTimer = useRef<number | null>(null);
-  const wheelDistance = useRef(0);
   const countFrame = useRef<number | null>(null);
-  const countDelayTimer = useRef<number | null>(null);
-  const openingTimer = useRef<number | null>(null);
   const hasCounted = useRef(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [dragX, setDragX] = useState(0);
   const [hovered, setHovered] = useState(false);
-  const [focused, setFocused] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const [coolingDown, setCoolingDown] = useState(false);
   const [compactViewport, setCompactViewport] = useState(false);
   const [sectionActive, setSectionActive] = useState(false);
+  const [countEligible, setCountEligible] = useState(false);
   const [motionReady, setMotionReady] = useState(false);
-  const [sceneOpening, setSceneOpening] = useState(false);
   const [countStarted, setCountStarted] = useState(false);
   const [countValues, setCountValues] = useState<number[]>(stats.map(() => 0));
-  const motionPaused = hovered || focused || dragging || coolingDown || !sectionActive;
-
-  const previous = useCallback(() => setActiveIndex((index) => visualOrder[(visualOrder.indexOf(index) - 1 + capabilities.length) % capabilities.length]), []);
-  const next = useCallback(() => setActiveIndex((index) => visualOrder[(visualOrder.indexOf(index) + 1) % capabilities.length]), []);
-
-  const resumeAfterInteraction = useCallback((delay = 2800) => {
-    setCoolingDown(true);
-    if (cooldownTimer.current !== null) window.clearTimeout(cooldownTimer.current);
-    cooldownTimer.current = window.setTimeout(() => setCoolingDown(false), delay);
-  }, []);
+  const motionPaused = dragging || !sectionActive;
 
   useEffect(() => {
     setMotionReady(true);
@@ -175,112 +182,190 @@ export function AboutWiloShowcase() {
   useEffect(() => {
     const section = rootRef.current;
     if (!section) return;
-    let intersectionRatio = 0;
     let markedActive = section.dataset.fullpageActive === "true";
-    const syncSceneState = () => {
-      const fullpage = document.documentElement.classList.contains("wilo-fullpage");
-      // FullPageController marks the destination at the beginning of its
-      // transition. Waiting for real visibility keeps the reveal observable
-      // after the Hero instead of completing while the section is off-screen.
-      const active = fullpage
-        ? markedActive && intersectionRatio >= 0.62
-        : intersectionRatio >= 0.28;
+    let measureFrame = 0;
+    const measure = () => {
+      measureFrame = 0;
+      const rect = section.getBoundingClientRect();
+      const visible = Math.max(0, Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0));
+      const ratio = Math.max(0, Math.min(1, visible / Math.min(rect.height, window.innerHeight)));
+      const relevant = ratio > 0.005 || markedActive;
+      const progress = ratio;
+      sceneProgressRef.current = progress;
+      sceneNearRef.current = relevant && progress >= 0.06;
+      section.style.setProperty("--about-progress", progress.toFixed(4));
+      const active = relevant && progress >= 0.08;
       setSectionActive(active);
+      setCountEligible(relevant && progress >= 0.56);
+      setMotionReady(true);
+    };
+    const requestMeasure = () => {
+      if (!measureFrame) measureFrame = window.requestAnimationFrame(measure);
     };
     const updateFullpageState = () => {
       markedActive = section.dataset.fullpageActive === "true";
-      syncSceneState();
+      requestMeasure();
     };
     const mutation = new MutationObserver(updateFullpageState);
     mutation.observe(section, { attributes: true, attributeFilter: ["data-fullpage-active"] });
-    const intersection = new IntersectionObserver(([entry]) => {
-      intersectionRatio = entry.isIntersecting ? entry.intersectionRatio : 0;
-      syncSceneState();
-    }, { threshold: [0, 0.28, 0.45, 0.62, 0.78] });
-    intersection.observe(section);
-    updateFullpageState();
+    window.addEventListener("scroll", requestMeasure, { passive: true });
+    window.addEventListener("resize", requestMeasure, { passive: true });
+    measure();
     return () => {
       mutation.disconnect();
-      intersection.disconnect();
+      window.cancelAnimationFrame(measureFrame);
+      window.removeEventListener("scroll", requestMeasure);
+      window.removeEventListener("resize", requestMeasure);
     };
   }, []);
 
   useEffect(() => {
-    if (openingTimer.current !== null) window.clearTimeout(openingTimer.current);
-    if (!sectionActive || reducedMotion) {
-      setSceneOpening(false);
-      return;
-    }
-    setSceneOpening(true);
-    openingTimer.current = window.setTimeout(() => setSceneOpening(false), 1500);
-  }, [reducedMotion, sectionActive]);
+    interactionPausedRef.current = dragging;
+    hoverSlowRef.current = hovered;
+  }, [dragging, hovered]);
 
   useEffect(() => {
-    if (!sectionActive || hasCounted.current) return;
+    if (!countEligible || hasCounted.current) return;
+    hasCounted.current = true;
+    setCountStarted(true);
     if (reducedMotion) {
-      hasCounted.current = true;
-      setCountStarted(true);
       setCountValues(stats.map((stat) => stat.value));
       return;
     }
-    countDelayTimer.current = window.setTimeout(() => {
-      hasCounted.current = true;
-      setCountStarted(true);
-      setCountValues(stats.map(() => 0));
-      // Keep the zero state on screen briefly so the count-up has a readable
-      // origin instead of jumping on the very first painted frame.
-      const startedAt = performance.now() + 300;
-      const durations = [1900, 1050, 900, 1400];
-      const tick = (now: number) => {
-        let running = false;
-        const values = stats.map((stat, index) => {
-          const progress = Math.max(0, Math.min(1, (now - startedAt) / durations[index]));
-          if (progress < 1) running = true;
-          const eased = 1 - Math.pow(1 - progress, 3);
-          return Math.round(stat.value * eased);
-        });
-        setCountValues(values);
-        if (running) countFrame.current = window.requestAnimationFrame(tick);
-      };
-      countFrame.current = window.requestAnimationFrame(tick);
-    }, 720);
-    return () => {
-      if (!hasCounted.current && countDelayTimer.current !== null) {
-        window.clearTimeout(countDelayTimer.current);
-        countDelayTimer.current = null;
-      }
+    setCountValues(stats.map(() => 0));
+    const startedAt = performance.now() + 150;
+    const durations = [1900, 1050, 900, 1400];
+    const tick = (now: number) => {
+      let running = false;
+      const values = stats.map((stat, index) => {
+        const progress = Math.max(0, Math.min(1, (now - startedAt) / durations[index]));
+        if (progress < 1) running = true;
+        return Math.round(stat.value * easeOutCubic(progress));
+      });
+      setCountValues(values);
+      if (running) countFrame.current = window.requestAnimationFrame(tick);
     };
-  }, [reducedMotion, sectionActive]);
+    countFrame.current = window.requestAnimationFrame(tick);
+  }, [countEligible, reducedMotion]);
 
   useEffect(() => {
-    if (motionPaused || reducedMotion || compactViewport) return;
-    const timer = window.setInterval(next, 5800);
-    return () => window.clearInterval(timer);
-  }, [compactViewport, motionPaused, next, reducedMotion]);
+    let lastFrameAt = performance.now();
+    let renderedActive = -1;
+
+    const renderCards = () => {
+      const carousel = carouselRef.current;
+      if (!carousel) return;
+      const width = carousel.clientWidth || 800;
+      const entry = reducedMotion
+        ? 1
+        : Math.max(0, Math.min(1, (sceneProgressRef.current - 0.08) / 0.34));
+      const phase = phaseRef.current;
+      const nearestOrder = ((Math.round(phase) % capabilities.length) + capabilities.length) % capabilities.length;
+      const nearestIndex = visualOrder[nearestOrder];
+      if (nearestIndex !== renderedActive) {
+        renderedActive = nearestIndex;
+        carousel.style.setProperty("--active-glow", capabilities[nearestIndex].color);
+        setActiveIndex(nearestIndex);
+      }
+
+      cardRefs.current.forEach((card, index) => {
+        if (!card) return;
+        const order = visualOrder.indexOf(index);
+        const offset = wrapOffset(order - phase);
+        const absolute = Math.abs(offset);
+        const sign = Math.sign(offset);
+        const spread = compactViewport ? 0.64 : 0.45;
+        const naturalX = sign * width * spread * (1 - Math.exp(-absolute * 0.92));
+        const naturalZ = 120 - Math.min(absolute, 2.5) * 235;
+        const naturalY = absolute * (compactViewport ? 5 : 8);
+        const naturalScale = Math.max(0.7, 1.06 - absolute * 0.155);
+        const naturalRotateY = -sign * Math.min(19, absolute * 13.5);
+        const naturalRotateZ = sign * Math.min(5, absolute * 2.8);
+        const edgeFade = absolute > 2.2 ? Math.max(0, 1 - (absolute - 2.2) / 0.55) : 1;
+        const naturalOpacity = Math.max(0.5, 1 - absolute * 0.2) * edgeFade;
+        const depthParallax = Math.max(-1.5, 0.75 - absolute * 1.125);
+        const x = naturalX * entry + parallaxRef.current.x * depthParallax;
+        const y = 24 * (1 - entry) + naturalY * entry + parallaxRef.current.y * depthParallax;
+        const z = -270 + (naturalZ + 270) * entry;
+        const scale = 0.84 + (naturalScale - 0.84) * entry;
+        const rotateY = naturalRotateY * entry;
+        const rotateZ = naturalRotateZ * entry;
+        const opacity = 0.22 + (naturalOpacity - 0.22) * entry;
+        const blur = (1 - entry) * 3.5 + Math.max(0, absolute - 1.2) * 0.7;
+        card.style.transform = `translate3d(calc(-50% + ${x.toFixed(2)}px), calc(-50% + ${y.toFixed(2)}px), ${z.toFixed(2)}px) rotateY(${rotateY.toFixed(2)}deg) rotateZ(${rotateZ.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
+        card.style.opacity = opacity.toFixed(3);
+        card.style.filter = `blur(${blur.toFixed(2)}px) saturate(${(0.76 + entry * 0.24).toFixed(3)})`;
+        card.style.zIndex = String(100 - Math.round(absolute * 20));
+        card.dataset.phaseOffset = offset.toFixed(3);
+      });
+    };
+
+    renderCarouselRef.current = renderCards;
+    const tick = (now: number) => {
+      const delta = Math.min(48, Math.max(0, now - lastFrameAt));
+      lastFrameAt = now;
+      if (phaseTargetRef.current !== null) {
+        if (reducedMotion) {
+          phaseRef.current = phaseTargetRef.current;
+          phaseVelocityRef.current = 0;
+          phaseTargetRef.current = null;
+        } else {
+          const step = Math.min(0.032, delta / 1000);
+          const distance = phaseRef.current - phaseTargetRef.current;
+          const acceleration = -SNAP_STIFFNESS * distance - SNAP_DAMPING * phaseVelocityRef.current;
+          phaseVelocityRef.current += acceleration * step;
+          phaseRef.current += phaseVelocityRef.current * step;
+          if (Math.abs(distance) < 0.018 && Math.abs(phaseVelocityRef.current) < 0.16) {
+            phaseRef.current = phaseTargetRef.current;
+            phaseVelocityRef.current = 0;
+            phaseTargetRef.current = null;
+          }
+        }
+      } else if (!reducedMotion && sceneNearRef.current && !interactionPausedRef.current && now >= resumeAtRef.current) {
+        const fractional = Math.abs(phaseRef.current - Math.round(phaseRef.current));
+        const orbitEase = 0.68 + Math.sin(Math.min(1, fractional * 2) * Math.PI / 2) * 0.32;
+        const hoverFactor = hoverSlowRef.current ? 0.14 : 1;
+        phaseRef.current += (delta / CARD_TRAVEL_MS) * orbitEase * hoverFactor;
+      }
+      renderCards();
+      carouselFrame.current = window.requestAnimationFrame(tick);
+    };
+    carouselFrame.current = window.requestAnimationFrame(tick);
+    return () => {
+      if (carouselFrame.current !== null) window.cancelAnimationFrame(carouselFrame.current);
+      renderCarouselRef.current = () => undefined;
+    };
+  }, [compactViewport, reducedMotion]);
 
   useEffect(() => () => {
-    if (cooldownTimer.current !== null) window.clearTimeout(cooldownTimer.current);
-    if (wheelResetTimer.current !== null) window.clearTimeout(wheelResetTimer.current);
-    if (countDelayTimer.current !== null) window.clearTimeout(countDelayTimer.current);
-    if (openingTimer.current !== null) window.clearTimeout(openingTimer.current);
     if (countFrame.current !== null) window.cancelAnimationFrame(countFrame.current);
   }, []);
 
-  const runControl = (action: () => void) => {
-    action();
-    resumeAfterInteraction();
+  const moveBy = (direction: -1 | 1) => {
+    phaseVelocityRef.current = 0;
+    phaseTargetRef.current = Math.round(phaseRef.current) + direction;
+    resumeAtRef.current = performance.now() + 2200;
+  };
+
+  const moveToCard = (index: number) => {
+    const order = visualOrder.indexOf(index);
+    phaseVelocityRef.current = 0;
+    phaseTargetRef.current = phaseRef.current + wrapOffset(order - phaseRef.current);
+    resumeAtRef.current = performance.now() + 2200;
   };
 
   const onScenePointerMove = (event: PointerEvent<HTMLElement>) => {
     if (reducedMotion || compactViewport || dragging) return;
     const rect = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 10;
-    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 8;
+    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 8;
+    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 6;
+    parallaxRef.current = { x, y };
     event.currentTarget.style.setProperty("--about-parallax-x", `${x.toFixed(2)}px`);
     event.currentTarget.style.setProperty("--about-parallax-y", `${y.toFixed(2)}px`);
   };
 
   const resetSceneParallax = () => {
+    parallaxRef.current = { x: 0, y: 0 };
     rootRef.current?.style.setProperty("--about-parallax-x", "0px");
     rootRef.current?.style.setProperty("--about-parallax-y", "0px");
   };
@@ -288,50 +373,62 @@ export function AboutWiloShowcase() {
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
     if (event.target instanceof Element && event.target.closest("[data-carousel-controls]")) return;
-    pointerStart.current = event.clientX;
-    pointerVelocity.current = { x: event.clientX, time: performance.now(), velocity: 0 };
+    pointer.current = {
+      id: event.pointerId,
+      startX: event.clientX,
+      startPhase: phaseRef.current,
+      x: event.clientX,
+      time: performance.now(),
+      velocityX: 0,
+    };
+    phaseVelocityRef.current = 0;
+    phaseTargetRef.current = null;
     suppressClick.current = false;
-    const slide = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-slide-index]") : null;
-    pointerSlideIndex.current = slide ? Number(slide.dataset.slideIndex) : null;
     setDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (pointerStart.current === null) return;
+    if (pointer.current.id !== event.pointerId) return;
     const time = performance.now();
-    pointerVelocity.current = { x: event.clientX, time, velocity: (event.clientX - pointerVelocity.current.x) / Math.max(1, time - pointerVelocity.current.time) };
-    setDragX(Math.max(-160, Math.min(160, event.clientX - pointerStart.current)));
+    const width = carouselRef.current?.clientWidth || 800;
+    const step = width * (compactViewport ? 0.5 : 0.36);
+    pointer.current.velocityX = (event.clientX - pointer.current.x) / Math.max(1, time - pointer.current.time);
+    pointer.current.x = event.clientX;
+    pointer.current.time = time;
+    const distance = event.clientX - pointer.current.startX;
+    suppressClick.current = Math.abs(distance) > 7;
+    phaseRef.current = pointer.current.startPhase - distance / step;
+    renderCarouselRef.current();
   };
 
   const endPointer = (event: PointerEvent<HTMLDivElement>, cancelled = false) => {
-    if (pointerStart.current !== null && !cancelled) {
-      const distance = event.clientX - pointerStart.current;
-      const projected = distance + pointerVelocity.current.velocity * 100;
-      suppressClick.current = Math.abs(distance) > 8;
-      if (projected < -50) next();
-      else if (projected > 50) previous();
-      else if (Math.abs(distance) < 8 && pointerSlideIndex.current !== null) setActiveIndex(pointerSlideIndex.current);
+    if (pointer.current.id === event.pointerId) {
+      const width = carouselRef.current?.clientWidth || 800;
+      const step = width * (compactViewport ? 0.5 : 0.36);
+      if (cancelled) {
+        phaseTargetRef.current = Math.round(phaseRef.current);
+        phaseVelocityRef.current = 0;
+      } else {
+        const releaseVelocity = Math.max(-2.4, Math.min(2.4, (-pointer.current.velocityX / step) * 1000));
+        const currentNearest = Math.round(phaseRef.current);
+        let target = Math.round(phaseRef.current + releaseVelocity * 0.18);
+        if (Math.abs(releaseVelocity) > 0.48 && target === currentNearest) {
+          target = currentNearest + Math.sign(releaseVelocity);
+        }
+        phaseVelocityRef.current = releaseVelocity;
+        phaseTargetRef.current = target;
+      }
+      resumeAtRef.current = performance.now() + 2000;
     }
-    pointerStart.current = null;
-    pointerSlideIndex.current = null;
-    setDragX(0);
+    pointer.current.id = -1;
     setDragging(false);
-    resumeAfterInteraction();
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
 
   const onWheel = (event: WheelEvent<HTMLDivElement>) => {
     if (Math.abs(event.deltaX) < 12 || Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
-    wheelDistance.current += event.deltaX;
-    resumeAfterInteraction();
-    if (Math.abs(wheelDistance.current) >= 42) {
-      if (wheelDistance.current > 0) next();
-      else previous();
-      wheelDistance.current = 0;
-    }
-    if (wheelResetTimer.current !== null) window.clearTimeout(wheelResetTimer.current);
-    wheelResetTimer.current = window.setTimeout(() => { wheelDistance.current = 0; }, 180);
+    moveBy(event.deltaX > 0 ? 1 : -1);
   };
 
   return (
@@ -342,7 +439,6 @@ export function AboutWiloShowcase() {
       data-active={sectionActive}
       data-entered={sectionActive}
       data-motion-ready={motionReady}
-      data-opening={sceneOpening}
       id="sobre-wilo"
       onPointerLeave={resetSceneParallax}
       onPointerMove={onScenePointerMove}
@@ -355,7 +451,10 @@ export function AboutWiloShowcase() {
           <div className={styles.copy}>
             <span className={styles.eyebrow}><b>02</b><i /> SOBRE WILO STUDIO</span>
             <p className={styles.statement}>NO USAMOS WORDPRESS.</p>
-            <h2 id="about-wilo-title"><em>NUESTRO LÍMITE</em><br />ES TU CREATIVIDAD.</h2>
+            <h2 id="about-wilo-title">
+              <span className={styles.headlineLine}><em>NUESTRO LÍMITE</em></span>
+              <span className={styles.headlineLine}><b>ES TU CREATIVIDAD.</b></span>
+            </h2>
             <p className={styles.subhead}>DISEÑAMOS Y CREAMOS HASTA LO QUE<br /> SE CREE <strong>IMPOSIBLE.</strong></p>
             <div className={styles.measureCopy}>
               <p>Wilo Studio es un estudio peruano de tecnología, diseño y producción que desarrolla soluciones digitales y creativas a medida.</p>
@@ -370,26 +469,20 @@ export function AboutWiloShowcase() {
             className={styles.carousel}
             data-paused={motionPaused}
             data-dragging={dragging}
-            onBlur={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget)) {
-                setFocused(false);
-                resumeAfterInteraction();
-              }
-            }}
-            onFocus={() => setFocused(true)}
+            ref={carouselRef}
+            style={{ "--active-glow": capabilities[activeIndex].color } as CSSProperties}
             onKeyDown={(event) => {
-              if (event.key === "ArrowLeft") { event.preventDefault(); runControl(previous); }
-              if (event.key === "ArrowRight") { event.preventDefault(); runControl(next); }
+              if (event.key === "ArrowLeft") { event.preventDefault(); moveBy(-1); }
+              if (event.key === "ArrowRight") { event.preventDefault(); moveBy(1); }
             }}
             onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => { setHovered(false); resumeAfterInteraction(); }}
+            onMouseLeave={() => setHovered(false)}
             onPointerCancel={(event) => endPointer(event, true)}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={(event) => endPointer(event)}
             onWheel={onWheel}
             role="region"
-            style={{ "--drag-x": `${dragX}px` } as CSSProperties}
             tabIndex={0}
           >
             <div className={styles.cardStack}>
@@ -401,11 +494,13 @@ export function AboutWiloShowcase() {
                     aria-pressed={position === 0}
                     className={styles.capabilityCard}
                     data-position={position}
+                    data-slide-key={item.key}
                     data-slide-index={index}
                     aria-hidden={Math.abs(position) > 2}
                     tabIndex={Math.abs(position) > 2 ? -1 : 0}
                     key={item.key}
-                    onClick={() => { if (!suppressClick.current) setActiveIndex(index); resumeAfterInteraction(); }}
+                    onClick={() => { if (!suppressClick.current) moveToCard(index); }}
+                    ref={(node) => { cardRefs.current[index] = node; }}
                     style={{ "--capability-color": item.color } as CSSProperties}
                     type="button"
                   >
@@ -422,9 +517,9 @@ export function AboutWiloShowcase() {
               })}
             </div>
             <div className={styles.carouselControls} data-carousel-controls>
-              <button onClick={() => runControl(previous)} type="button" aria-label="Ver capacidad anterior"><ArrowLeft aria-hidden="true" /></button>
+              <button onClick={() => moveBy(-1)} type="button" aria-label="Ver capacidad anterior"><ArrowLeft aria-hidden="true" /></button>
               <div aria-hidden="true">{capabilities.map((item, index) => <i data-active={index === activeIndex} key={item.key} />)}</div>
-              <button onClick={() => runControl(next)} type="button" aria-label="Ver capacidad siguiente"><ArrowRight aria-hidden="true" /></button>
+              <button onClick={() => moveBy(1)} type="button" aria-label="Ver capacidad siguiente"><ArrowRight aria-hidden="true" /></button>
             </div>
             <p className={styles.srOnly} aria-live="polite">{capabilities[activeIndex].name}, {activeIndex + 1} de {capabilities.length}</p>
           </div>
@@ -447,6 +542,7 @@ export function AboutWiloShowcase() {
         </div>
 
         <div className={styles.clientMarquee} aria-label="Carrusel infinito de marcas y proyectos de Wilo Studio">
+          <p>MARCAS Y PROYECTOS<br />QUE CONFÍAN EN WILO</p>
           <div className={styles.marqueeViewport}>
             <div className={styles.marqueeTrack}>
               {[...clientMarks, ...clientMarks].map((item, index) => (
