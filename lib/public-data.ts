@@ -58,6 +58,7 @@ function mapProduct(item: Product & { category: ProductCategory }): StoreProduct
     image: images[0] || "/images/icon-sistemas.png",
     images: images.length ? images : ["/images/icon-sistemas.png"],
     stock: item.stock,
+    featured: item.featured,
     delivery,
     description: item.description || "Producto original con soporte de Wilo Studio.",
     specs: parseImages(item.specifications),

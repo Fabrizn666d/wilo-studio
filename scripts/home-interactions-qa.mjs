@@ -1,6 +1,6 @@
 import { chromium } from "playwright";
 
-const baseUrl = process.env.QA_BASE_URL || "http://127.0.0.1:3007";
+const baseUrl = process.env.QA_BASE_URL || "http://127.0.0.1:3000";
 const executablePath = process.env.PLAYWRIGHT_CHROMIUM_PATH
   || "C:\\Users\\FAbri\\AppData\\Local\\ms-playwright\\chromium-1228\\chrome-win64\\chrome.exe";
 
@@ -46,23 +46,20 @@ try {
     assert((await carouselTitle.textContent()) !== initialProject, "carousel drag did not change the active project");
   }
 
-  const deepDive = page.locator("#proyectos");
-  await deepDive.scrollIntoViewIfNeeded();
-  await deepDive.getByRole("button", { name: /Geoingenieros/i }).click();
-  await page.waitForTimeout(1_250);
-  assert((await deepDive.locator("h3").textContent())?.includes("Geoingenieros"), "project deep dive selector did not update the case");
-
   const capabilities = page.locator("#servicios");
   await capabilities.scrollIntoViewIfNeeded();
-  await capabilities.getByRole("button", { name: "Explorar Automatización & APIs" }).click();
-  await page.waitForTimeout(450);
-  assert((await capabilities.locator("h3").textContent())?.includes("Automatización"), "capability explorer did not update the active capability");
+  const initialService = await capabilities.locator("[aria-live='polite']").textContent();
+  await capabilities.getByRole("button", { name: /siguiente servicio/i }).click();
+  await page.waitForTimeout(850);
+  const nextService = await capabilities.locator("[aria-live='polite']").textContent();
+  assert(Boolean(initialService && nextService && initialService !== nextService), "services carousel next arrow did not change the active service");
 
   const lab = page.locator("#lab");
   await lab.scrollIntoViewIfNeeded();
-  await lab.getByRole("button", { name: "Mostrar el módulo CRM" }).click();
+  const crmButton = lab.locator("[role='group'] button").filter({ hasText: "CRM" });
+  await crmButton.click();
   await page.waitForTimeout(350);
-  assert(await lab.getByRole("button", { name: "Mostrar el módulo CRM" }).getAttribute("aria-pressed") === "true", "Wilo Lab panel selection did not update");
+  assert(await crmButton.getAttribute("aria-pressed") === "true", "Wilo Lab panel selection did not update");
 
   assert(errors.length === 0, `browser errors: ${errors.join(" | ")}`);
 

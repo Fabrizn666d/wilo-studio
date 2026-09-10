@@ -212,7 +212,7 @@ export const clientMarks = [
 
 export const ecosystemLines = [
   { key: "studio", name: "Wilo Studio", eyebrow: "Soluciones a medida", description: "Web, sistemas, aplicaciones, automatización, identidad y producción visual.", href: "/#servicios", accent: "#F1B824" },
-  { key: "express", name: "Wilo Express", eyebrow: "Web rápida para negocios", description: "Una presencia profesional, administrable y lista para operar con una estructura probada.", href: "/express", accent: "#71A7FF" },
+  { key: "express", name: "Wilo Express", eyebrow: "Web rápida para negocios", description: "Una presencia profesional, administrable y lista para operar con una estructura probada.", href: process.env.NEXT_PUBLIC_WILO_EXPRESS_URL || "https://wilo.site", accent: "#71A7FF" },
   { key: "education", name: "Wilo Education", eyebrow: "Tecnología que se aprende", description: "Robótica, construcción y experiencias STEM para instituciones y estudiantes.", href: "/education", accent: "#8F6BFF" },
   { key: "events", name: "Wilo Events", eyebrow: "Experiencias corporativas", description: "Producción audiovisual e infraestructura técnica para encuentros de marca.", href: "/events", accent: "#FF7A45" },
   { key: "store", name: "Wilo Store", eyebrow: "Tecnología para crear", description: "Equipos, componentes, periféricos y software para tus proyectos.", href: "/tienda", accent: "#2674E8" },

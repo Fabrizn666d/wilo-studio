@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { createMercadoPagoPreference } from "@/lib/payments";
 import { nextReservationExpiration, releaseExpiredReservations, releaseOrderReservation, reserveOrderInventory } from "@/lib/order-payment";
 import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
+import { calculatePromotion } from "@/lib/store-promotions";
 import { orderSchema } from "@/lib/validation";
 
 export const runtime = "nodejs";
@@ -32,6 +33,12 @@ function normalizeBody(body: unknown) {
     documentNumber: input.documentNumber ?? input.numero_documento,
     companyName: input.companyName ?? input.razon_social,
     companyRuc: input.companyRuc ?? input.ruc,
+    department: input.department ?? input.departamento,
+    province: input.province ?? input.provincia,
+    district: input.district ?? input.distrito,
+    address: input.address ?? input.direccion,
+    addressReference: input.addressReference ?? input.referencia,
+    promoCode: input.promoCode ?? input.codigo_promocional,
     paymentMethod,
     notes: input.notes ?? input.notas,
     expectedTotalCents: input.expectedTotalCents ?? input.total_esperado_centavos,
@@ -66,7 +73,10 @@ export async function POST(request: NextRequest) {
     const quantities = new Map<string, number>();
     for (const item of input.items) quantities.set(item.productId, (quantities.get(item.productId) || 0) + item.quantity);
     const ids = [...quantities.keys()];
-    const products = await prisma.product.findMany({ where: { id: { in: ids }, active: true, category: { active: true } } });
+    const products = await prisma.product.findMany({
+      where: { id: { in: ids }, active: true, category: { active: true } },
+      include: { category: { select: { slug: true } } },
+    });
     if (products.length !== ids.length) {
       throw new HttpError(422, "Uno o más productos ya no están disponibles.", "PRODUCT_UNAVAILABLE");
     }
@@ -82,8 +92,16 @@ export async function POST(request: NextRequest) {
       const unitTotalCents = product.includesTax ? product.priceCents : product.priceCents + unitTaxCents;
       return { product, quantity, unitTaxCents, unitTotalCents };
     });
-    const taxCents = pricedItems.reduce((sum, item) => sum + item.unitTaxCents * item.quantity, 0);
-    const totalCents = pricedItems.reduce((sum, item) => sum + item.unitTotalCents * item.quantity, 0);
+    const grossTaxCents = pricedItems.reduce((sum, item) => sum + item.unitTaxCents * item.quantity, 0);
+    const grossTotalCents = pricedItems.reduce((sum, item) => sum + item.unitTotalCents * item.quantity, 0);
+    const promotion = await calculatePromotion(input.promoCode, pricedItems.map((item) => ({
+      productId: item.product.id,
+      categorySlug: item.product.category.slug,
+      totalCents: item.unitTotalCents * item.quantity,
+    })));
+    const discountCents = promotion?.discountCents ?? 0;
+    const totalCents = Math.max(0, grossTotalCents - discountCents);
+    const taxCents = grossTotalCents > 0 ? Math.round(grossTaxCents * totalCents / grossTotalCents) : 0;
     const subtotalCents = totalCents - taxCents;
     if (input.expectedTotalCents !== totalCents) {
       throw new HttpError(
@@ -92,10 +110,25 @@ export async function POST(request: NextRequest) {
         "PRICE_CHANGED",
       );
     }
+    if (input.paymentMethod === "ONLINE" && discountCents > 0) {
+      throw new HttpError(422, "Para usar un cupón, finaliza por WhatsApp o elige pago manual.", "PROMO_ONLINE_UNAVAILABLE");
+    }
     const token = randomBytes(32).toString("base64url");
     const number = orderNumber();
 
-    const order = await prisma.order.create({
+    const order = await prisma.$transaction(async (transaction) => {
+      if (promotion) {
+        const claimed = await transaction.promotion.updateMany({
+          where: {
+            id: promotion.id,
+            active: true,
+            ...(promotion.maxUses !== null ? { usedCount: { lt: promotion.maxUses } } : {}),
+          },
+          data: { usedCount: { increment: 1 } },
+        });
+        if (claimed.count !== 1) throw new HttpError(409, "Este cupón alcanzó su límite de usos.", "PROMO_USAGE_LIMIT");
+      }
+      return transaction.order.create({
         data: {
           number,
           customerName: input.customerName,
@@ -105,9 +138,16 @@ export async function POST(request: NextRequest) {
           documentNumber: input.documentNumber,
           companyName: input.companyName,
           companyRuc: input.companyRuc,
+          department: input.department,
+          province: input.province,
+          district: input.district,
+          address: input.address,
+          addressReference: input.addressReference,
           paymentMethod: input.paymentMethod,
           subtotalCents,
           taxCents,
+          discountCents,
+          promoCode: promotion?.code,
           totalCents,
           notes: input.notes,
           publicTokenHash: hashPublicToken(token),
@@ -130,10 +170,13 @@ export async function POST(request: NextRequest) {
           subtotalCents: true,
           taxCents: true,
           totalCents: true,
+          discountCents: true,
+          promoCode: true,
           customerName: true,
           email: true,
           createdAt: true,
         },
+      });
     });
 
     let payment: { provider: "MERCADO_PAGO"; reference: string; checkoutUrl: string } | null = null;
@@ -171,6 +214,8 @@ export async function POST(request: NextRequest) {
           currency: order.currency,
           subtotalCents: order.subtotalCents,
           taxCents: order.taxCents,
+          discountCents: order.discountCents,
+          promoCode: order.promoCode,
           totalCents: order.totalCents,
           createdAt: order.createdAt,
         },

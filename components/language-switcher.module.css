@@ -1,0 +1,120 @@
+.switcher {
+  position: relative;
+  z-index: 120;
+  color: inherit;
+}
+
+.trigger {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: .74rem;
+  font-weight: 700;
+  gap: .42rem;
+  min-height: 36px;
+  padding: .35rem .52rem;
+  transition: background-color .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+.trigger:hover,
+.trigger[aria-expanded="true"] {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  border-color: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.trigger:focus-visible,
+.option:focus-visible {
+  outline: 3px solid rgba(76, 117, 255, .28);
+  outline-offset: 2px;
+}
+
+.flag {
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(5, 20, 44, .12);
+  display: block;
+  height: 14px;
+  object-fit: cover;
+  width: 20px;
+}
+
+.chevron {
+  height: 13px;
+  transition: transform .2s ease;
+  width: 13px;
+}
+
+.trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+.menu {
+  background: rgba(255, 255, 255, .97);
+  border: 1px solid rgba(9, 28, 57, .1);
+  border-radius: 16px;
+  box-shadow: 0 22px 60px rgba(4, 19, 43, .2);
+  color: #07152d;
+  display: grid;
+  gap: 2px;
+  min-width: 190px;
+  opacity: 0;
+  padding: 7px;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  transform: translateY(-6px) scale(.98);
+  transform-origin: top right;
+  transition: opacity .18s ease, transform .18s ease;
+  visibility: hidden;
+}
+
+.menuOpen {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+}
+
+.option {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  font-size: .82rem;
+  grid-template-columns: 22px 1fr auto;
+  gap: .62rem;
+  padding: .64rem .7rem;
+  text-align: left;
+  width: 100%;
+}
+
+.option:hover,
+.optionActive { background: #eef3ff; }
+.optionCode { color: #63718a; font-size: .68rem; font-weight: 800; letter-spacing: .08em; }
+.check { color: #2765ff; height: 15px; width: 15px; }
+
+.live {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+@media (max-width: 720px) {
+  .menu { position: fixed; right: 16px; top: 72px; }
+  .trigger { padding-inline: .4rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trigger, .menu, .chevron { transition: none; }
+}

@@ -23,6 +23,16 @@ const capabilities = [
   { Icon: BarChart3, title: "Analítica y datos", text: "Medimos, aprendemos y optimizamos.", color: "#00b5da" },
   { Icon: Headphones, title: "Soporte continuo", text: "Acompañamiento real en cada etapa.", color: "#e3a000" },
 ];
+const techLogos = [
+  ["React", "/tech/react.svg"],
+  ["Next.js", "/tech/next.svg"],
+  ["TypeScript", "/tech/typescript.svg"],
+  ["Node.js", "/tech/node.svg"],
+  ["PostgreSQL", "/tech/postgresql.svg"],
+  ["Prisma", "/tech/prisma.svg"],
+  ["GitHub", "/tech/github.svg"],
+  ["Tailwind CSS", "/tech/tailwind.svg"],
+] as const;
 
 export function TechnologyScene() {
   return <FullBleedSection id="tecnologia" className={`${styles.section} ${styles.technology}`} aria-labelledby="technology-title" data-scene-theme="light" spacing="scene">
@@ -34,7 +44,7 @@ export function TechnologyScene() {
           <h2 id="technology-title" data-reveal="title">TECNOLOGÍA<br /><em>QUE HACE POSIBLE</em><br />LO IMPOSIBLE.</h2>
           <h3 data-reveal="detail">Soluciones reales. Sin límites de plataforma.</h3>
           <p data-reveal="detail">Diseñamos y desarrollamos soluciones digitales a medida con tecnología moderna, infraestructura real, APIs, datos y motion. Construimos productos que escalan contigo.</p>
-          <Link href="/servicios" className={styles.darkButton} data-reveal="detail">Conoce nuestras soluciones <ArrowRight aria-hidden="true" /></Link>
+          <Link href="/#servicios" className={styles.darkButton} data-reveal="detail">Conoce nuestras soluciones <ArrowRight aria-hidden="true" /></Link>
           <span className={`${styles.handwritten} ${styles.techNote}`} data-reveal="detail">Mejores herramientas.<br />Grandes ideas.</span>
         </div>
         <EditorialTilt className={styles.techStage}>
@@ -58,7 +68,11 @@ export function TechnologyScene() {
         </EditorialTilt>
       </div>
       <ul className={styles.techCapabilities} data-reveal="detail">{capabilities.map(({ Icon, title, text, color }) => <li key={title} style={{ "--tech-color": color } as React.CSSProperties}><Icon aria-hidden="true" /><h3>{title}</h3><p>{text}</p></li>)}</ul>
-      <div className={styles.stackRail} data-reveal="detail"><span>UN ECOSISTEMA DE<br />TECNOLOGÍAS REALES</span>{stack.slice(0, 6).map(({ name, Icon, color }) => <strong key={name}><Icon aria-hidden="true" style={{ color }} />{name}</strong>)}<strong><Github aria-hidden="true" />GitHub</strong></div>
+      <div className={styles.stackMarquee} data-reveal="detail" aria-label="Tecnologías utilizadas por Wilo Studio">
+        <div className={styles.stackMarqueeTrack}>
+          {[0, 1].map((copy) => <div className={styles.stackMarqueeGroup} aria-hidden={copy === 1 || undefined} key={copy}>{techLogos.map(([name, source]) => <Image className={styles.stackLogo} src={source} alt={copy === 0 ? name : ""} width={170} height={46} key={`${copy}-${name}`} loading="eager" sizes="170px" />)}</div>)}
+        </div>
+      </div>
       <div className={styles.sceneFooter} data-reveal="detail"><span>WILO STUDIO</span><span>TECNOLOGÍA · CREATIVIDAD · IMPACTO REAL</span></div>
     </ViewportFrame>
   </FullBleedSection>;

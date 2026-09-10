@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import {
   Aperture,
-  ArrowDown,
-  ArrowRight,
   Camera,
   Check,
   Clapperboard,
   Film,
   Plane,
 } from "lucide-react";
+import { AudiovisualScene } from "@/components/home/AudiovisualScene";
+import { HomeSceneMotion } from "@/components/home/HomeSceneMotion";
 import { RouteCta } from "@/components/public-routes/route-ui";
 import { siteConfig } from "@/lib/content";
 import styles from "./audiovisual-cinematic.module.css";
@@ -79,37 +77,7 @@ export default function AudiovisualPage() {
     <main className={`pr-page ${styles.page}`} id="contenido">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c") }} />
 
-      <header className={styles.hero}>
-        <Image
-          alt="Cámara de cine en un set profesional de producción"
-          className={styles.heroImage}
-          fill
-          priority
-          sizes="100vw"
-          src="/images/wilo/generated/audiovisual-set-v2.webp"
-        />
-        <div className={styles.heroShade} aria-hidden="true" />
-        <div className={styles.frameCorners} aria-hidden="true"><i /><i /><i /><i /></div>
-        <div className={styles.shell}>
-          <nav aria-label="Migas de pan" className={styles.breadcrumbs}>
-            <Link href="/">Wilo Studio</Link><span aria-hidden="true">/</span>
-            <Link href="/servicios">Servicios</Link><span aria-hidden="true">/</span>
-            <span>Producción audiovisual</span>
-          </nav>
-          <div className={styles.heroCopy}>
-            <span className={styles.kicker}><b>02</b> Producción audiovisual</span>
-            <h1>Historias que <em>conectan marcas.</em></h1>
-            <p>Creamos fotografía, video y tomas aéreas con una dirección visual consistente para presentar empresas, marcas y eventos con calidad profesional.</p>
-            <div className={styles.heroActions}>
-              <a className={styles.primaryButton} href="#capacidades">Explorar capacidades <ArrowDown aria-hidden="true" /></a>
-              <Link className={styles.lineButton} href="/contacto">Cotizar producción <ArrowRight aria-hidden="true" /></Link>
-            </div>
-          </div>
-          <div className={styles.takeLabel} aria-hidden="true">
-            <span>REC</span><i /> <strong>WILO / TAKE 02</strong>
-          </div>
-        </div>
-      </header>
+      <AudiovisualScene />
 
       <section className={styles.formatRail} aria-label="Formatos de producción audiovisual">
         <div className={styles.shell}>
@@ -177,6 +145,7 @@ export default function AudiovisualPage() {
         text="Cuéntanos qué necesitas, dónde se realizará y en qué canales quieres publicar el contenido."
         title="Haz que tu marca se vea tan profesional como lo que ofrece."
       />
+      <HomeSceneMotion />
     </main>
   );
 }

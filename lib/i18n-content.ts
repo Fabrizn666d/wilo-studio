@@ -1,0 +1,143 @@
+import type { Locale } from "./i18n";
+
+type ContentDictionary = Record<string, string>;
+
+const loaders: Record<Exclude<Locale, "es">, () => Promise<{ default: ContentDictionary }>> = {
+  en: () => import("@/messages/content.en.json"),
+  de: () => import("@/messages/content.de.json"),
+  zh: () => import("@/messages/content.zh.json"),
+  ja: () => import("@/messages/content.ja.json"),
+  qu: () => import("@/messages/content.qu.json"),
+  pt: () => import("@/messages/content.pt.json"),
+};
+
+const manualOverrides: Record<Exclude<Locale, "es">, ContentDictionary> = {
+  en: {
+    "Nosotros te ayudamos.": "We'll help you choose.",
+    "TRABAJOS": "WORK",
+    "EN MOVIMIENTO": "IN MOTION",
+    "NUESTRO LÍMITE": "OUR LIMIT",
+    "ES TU CREATIVIDAD.": "IS YOUR CREATIVITY.",
+    "TODO LO QUE": "EVERYTHING",
+    "PODEMOS": "WE CAN",
+    "CONSTRUIR.": "BUILD.",
+    "NO USAMOS WORDPRESS.": "WE DON'T USE WORDPRESS.",
+    "SOBRE WILO STUDIO": "ABOUT WILO STUDIO",
+    "NUESTRO PROCESO": "OUR PROCESS",
+    "CÓMO CONSTRUIMOS": "HOW WE BUILD",
+    "NO VENDEMOS SOFTWARE": "WE DON'T SELL SOFTWARE",
+    "POR VENDER SOFTWARE.": "FOR SOFTWARE'S SAKE.",
+    "LO QUE VES": "WHAT YOU SEE",
+    "ES SOLO LA": "IS ONLY THE",
+    "SUPERFICIE.": "SURFACE.",
+  },
+  de: {
+    "Tienda oficial Wilo": "Offizieller Wilo-Shop",
+    "Elige con confianza.": "Wählen Sie mit Vertrauen.",
+    "Nosotros te ayudamos.": "Wir beraten Sie dabei.",
+    "TRABAJOS": "ARBEITEN",
+    "EN MOVIMIENTO": "IN BEWEGUNG",
+    "NUESTRO LÍMITE": "UNSERE GRENZE",
+    "ES TU CREATIVIDAD.": "IST IHRE KREATIVITÄT.",
+    "TODO LO QUE": "ALLES, WAS",
+    "PODEMOS": "WIR",
+    "CONSTRUIR.": "BAUEN KÖNNEN.",
+    "NO USAMOS WORDPRESS.": "WIR NUTZEN KEIN WORDPRESS.",
+    "SOBRE WILO STUDIO": "ÜBER WILO STUDIO",
+    "NUESTRO PROCESO": "UNSER PROZESS",
+    "CÓMO CONSTRUIMOS": "WIE WIR ENTWICKELN",
+    "NO VENDEMOS SOFTWARE": "WIR VERKAUFEN SOFTWARE NICHT",
+    "POR VENDER SOFTWARE.": "NUR UM SOFTWARE ZU VERKAUFEN.",
+    "LO QUE VES": "WAS SIE SEHEN",
+    "ES SOLO LA": "IST NUR DIE",
+    "SUPERFICIE.": "OBERFLÄCHE.",
+  },
+  zh: {
+    "Nosotros te ayudamos.": "我们为你提供专业建议。",
+    "TRABAJOS": "作品",
+    "EN MOVIMIENTO": "持续进化",
+    "NUESTRO LÍMITE": "我们的边界",
+    "ES TU CREATIVIDAD.": "就是你的创造力。",
+    "TODO LO QUE": "一切皆可",
+    "PODEMOS": "为你",
+    "CONSTRUIR.": "构建。",
+    "NO USAMOS WORDPRESS.": "我们不使用 WORDPRESS。",
+    "SOBRE WILO STUDIO": "关于 WILO STUDIO",
+    "NUESTRO PROCESO": "我们的流程",
+    "CÓMO CONSTRUIMOS": "我们的构建方式",
+    "NO VENDEMOS SOFTWARE": "我们不为销售而",
+    "POR VENDER SOFTWARE.": "销售软件。",
+    "LO QUE VES": "你所看见的",
+    "ES SOLO LA": "只是",
+    "SUPERFICIE.": "表面。",
+  },
+  ja: {
+    "Nosotros te ayudamos.": "私たちがサポートします。",
+    "TRABAJOS": "実績",
+    "EN MOVIMIENTO": "進化し続ける",
+    "NUESTRO LÍMITE": "私たちの限界は",
+    "ES TU CREATIVIDAD.": "あなたの創造力です。",
+    "TODO LO QUE": "あらゆるものを",
+    "PODEMOS": "私たちは",
+    "CONSTRUIR.": "形にします。",
+    "NO USAMOS WORDPRESS.": "WORDPRESS は使いません。",
+    "SOBRE WILO STUDIO": "WILO STUDIO について",
+    "NUESTRO PROCESO": "制作プロセス",
+    "CÓMO CONSTRUIMOS": "私たちのつくり方",
+    "NO VENDEMOS SOFTWARE": "売るためだけのソフトウェアは",
+    "POR VENDER SOFTWARE.": "つくりません。",
+    "LO QUE VES": "見えているものは",
+    "ES SOLO LA": "ほんの",
+    "SUPERFICIE.": "表面です。",
+  },
+  qu: {
+    "Nosotros te ayudamos.": "Ñuqayku yanapasqaykiku.",
+    "TRABAJOS": "LLAMK'AYKUNA",
+    "EN MOVIMIENTO": "PURIRIYPI",
+    "NUESTRO LÍMITE": "ÑUQAYKUPA QURPANQA",
+    "ES TU CREATIVIDAD.": "QAMPA KAMAQ ATIYNIYKI.",
+    "TODO LO QUE": "TUKUYTA",
+    "PODEMOS": "ATIKU",
+    "CONSTRUIR.": "RUWAYTA.",
+    "NO USAMOS WORDPRESS.": "WORDPRESS NISQATA MANA APAYKUCHU.",
+    "SOBRE WILO STUDIO": "WILO STUDIO MANTA",
+    "NUESTRO PROCESO": "LLAMK'AY ÑANNIYKU",
+    "CÓMO CONSTRUIMOS": "IMAYNA RUWASQAYKU",
+    "NO VENDEMOS SOFTWARE": "SOFTWARE NISQATA MANA QATUYKUCHU",
+    "POR VENDER SOFTWARE.": "QATUNALLAPAQ.",
+    "LO QUE VES": "RIKUSQAYKIQA",
+    "ES SOLO LA": "HAWA PARTEÑALLAN",
+    "SUPERFICIE.": "KACHKAN.",
+  },
+  pt: {
+    "Nosotros te ayudamos.": "Nós ajudamos você a escolher.",
+    "TRABAJOS": "TRABALHOS",
+    "EN MOVIMIENTO": "EM MOVIMENTO",
+    "NUESTRO LÍMITE": "NOSSO LIMITE",
+    "ES TU CREATIVIDAD.": "É A SUA CRIATIVIDADE.",
+    "TODO LO QUE": "TUDO O QUE",
+    "PODEMOS": "PODEMOS",
+    "CONSTRUIR.": "CONSTRUIR.",
+    "NO USAMOS WORDPRESS.": "NÃO USAMOS WORDPRESS.",
+    "SOBRE WILO STUDIO": "SOBRE A WILO STUDIO",
+    "NUESTRO PROCESO": "NOSSO PROCESSO",
+    "CÓMO CONSTRUIMOS": "COMO CONSTRUÍMOS",
+    "NO VENDEMOS SOFTWARE": "NÃO VENDEMOS SOFTWARE",
+    "POR VENDER SOFTWARE.": "SÓ POR VENDER SOFTWARE.",
+    "LO QUE VES": "O QUE VOCÊ VÊ",
+    "ES SOLO LA": "É APENAS A",
+    "SUPERFICIE.": "SUPERFÍCIE.",
+  },
+};
+
+const cache = new Map<Locale, ContentDictionary>();
+
+export async function getContentDictionary(locale: Locale): Promise<ContentDictionary> {
+  if (locale === "es") return {};
+  const cached = cache.get(locale);
+  if (cached) return cached;
+  const imported = await loaders[locale]();
+  const dictionary = { ...imported.default, ...manualOverrides[locale] };
+  cache.set(locale, dictionary);
+  return dictionary;
+}

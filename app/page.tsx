@@ -8,11 +8,8 @@ import { LabExplorer } from "@/components/home/LabExplorer";
 import { ProcessJourney } from "@/components/home/ProcessJourney";
 import { ServicesCarousel } from "@/components/home/ServicesCarousel";
 import { StudioCarousel } from "@/components/home/StudioCarousel";
-import { AudiovisualScene } from "@/components/home/AudiovisualScene";
 import { TechnologyScene } from "@/components/home/TechnologyScene";
 import { StoreScene } from "@/components/home/StoreScene";
-import { OriginScene } from "@/components/home/OriginScene";
-import { WhyWiloScene } from "@/components/home/WhyWiloScene";
 import { InternationalScene } from "@/components/home/InternationalScene";
 import { ContactScene } from "@/components/home/ContactScene";
 import { ecosystemLines, labModules, processSteps } from "@/data/studio";
@@ -48,15 +45,27 @@ export default async function HomePage() {
       <HeroWilo />
       <AboutWiloShowcase />
       <FullBleedSection className={styles.workSection} id="trabajos" aria-labelledby="work-title" spacing="scene">
+        <div className={styles.workArcades} aria-hidden="true" />
+        <div className={styles.workEditorialLabel} data-reveal="detail" aria-hidden="true">
+          <span>IDEAS</span><span>TECNOLOGÍA</span><span>MARCAS REALES</span><i />
+        </div>
+        <p className={`${styles.workNote} ${styles.workNoteTop}`} data-reveal="detail" aria-hidden="true">
+          Desde<br />Arequipa<br />para el mundo<i />
+        </p>
+        <p className={`${styles.workNote} ${styles.workNoteLeft}`} data-reveal="detail" aria-hidden="true">
+          Arequipa<br />inspira<br />grandes<br />ideas<i />
+        </p>
+        <p className={`${styles.workNote} ${styles.workNoteRight}`} data-reveal="detail" aria-hidden="true">
+          Marcas<br />que no se detienen<i />
+        </p>
         <ViewportFrame>
-          <header className={styles.stageHeader} data-reveal>
-            <span><i />03<i /> TRABAJOS EN MOVIMIENTO</span>
-            <h2 id="work-title">Trabajos en movimiento</h2>
-            <p>Sitios web reales para <em>marcas que no se detienen.</em></p>
+          <header className={styles.stageHeader}>
+            <h2 id="work-title" data-reveal="heading">TRABAJOS <em>EN MOVIMIENTO</em></h2>
+            <p data-reveal="copy">Sitios web reales para <em>marcas que no se detienen.</em></p>
           </header>
         </ViewportFrame>
         <CarouselFrame className={styles.workCarouselFrame} edge="wide" data-reveal="media">
-          <StudioCarousel projects={studioProjects} />
+          <StudioCarousel projects={studioProjects.slice(0, 6)} />
         </CarouselFrame>
       </FullBleedSection>
       <ServicesCarousel />
@@ -64,15 +73,12 @@ export default async function HomePage() {
         <h2 className={styles.srOnly} id="lab-title">Wilo Lab</h2>
         <LabExplorer modules={labModules} />
       </SectionShell>
-      <AudiovisualScene />
       <ProcessJourney steps={processSteps} />
-      <WhyWiloScene />
       <TechnologyScene />
       <StoreScene />
       <SectionShell className={styles.ecosystemSection} frame="wide" id="ecosistema" aria-labelledby="ecosystem-title" spacing="compact">
         <EcosystemExplorer lines={ecosystemLines} />
       </SectionShell>
-      <OriginScene />
       <InternationalScene />
       <ContactScene settings={settings} />
       <HomeSceneMotion />

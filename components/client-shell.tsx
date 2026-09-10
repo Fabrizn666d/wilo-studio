@@ -9,33 +9,34 @@ import { SiteHeader } from "./site-header";
 import { SiteSettingsProvider } from "./site-settings-provider";
 import { SmoothScroll } from "./smooth-scroll";
 import { WhatsappFab } from "./whatsapp-fab";
-import { FullPageController, FullPageSection } from "./home/FullPageController";
-import fullPageStyles from "./home/full-page-controller.module.css";
+import { FullPageController } from "./home/FullPageController";
 import type { PublicSiteSettings } from "@/lib/site-settings";
+import type { Locale } from "@/lib/i18n";
+import { I18nProvider } from "./i18n-provider";
 
-export function ClientShell({ children, settings }: { children: React.ReactNode; settings: PublicSiteSettings }) {
+export function ClientShell({ children, settings, initialLocale }: { children: React.ReactNode; settings: PublicSiteSettings; initialLocale: Locale }) {
   const pathname = usePathname();
   if (pathname.startsWith("/admin")) {
-    return <SiteSettingsProvider initialValue={settings}>{children}</SiteSettingsProvider>;
+    return <I18nProvider initialLocale={initialLocale}><SiteSettingsProvider initialValue={settings}>{children}</SiteSettingsProvider></I18nProvider>;
   }
   return (
-    <SiteSettingsProvider initialValue={settings}>
-      <CartProvider>
-        {pathname === "/" ? <Preloader /> : null}
-        {pathname === "/" ? null : <SmoothScroll />}
-        {pathname === "/" ? null : <SiteHeader />}
-        {pathname === "/" ? (
-          <FullPageController>
-            {children}
-            <FullPageSection className={fullPageStyles.footerSection} id="pie-de-pagina" aria-label="Pie de pÃ¡gina">
+    <I18nProvider initialLocale={initialLocale}>
+      <SiteSettingsProvider initialValue={settings}>
+        <CartProvider>
+          {pathname === "/" ? <Preloader /> : null}
+          {pathname === "/" ? null : <SmoothScroll />}
+          {pathname === "/" ? null : <SiteHeader />}
+          {pathname === "/" ? (
+            <>
+              <FullPageController>{children}</FullPageController>
               <SiteFooter />
-            </FullPageSection>
-          </FullPageController>
-        ) : children}
-        <CartDrawer />
-        {pathname === "/" ? null : <SiteFooter />}
-        {pathname === "/" ? null : <WhatsappFab />}
-      </CartProvider>
-    </SiteSettingsProvider>
+            </>
+          ) : children}
+          <CartDrawer />
+          {pathname === "/" ? null : <SiteFooter />}
+          {pathname === "/" ? null : <WhatsappFab />}
+        </CartProvider>
+      </SiteSettingsProvider>
+    </I18nProvider>
   );
 }

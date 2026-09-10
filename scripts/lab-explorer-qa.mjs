@@ -29,10 +29,16 @@ async function prepare(viewport, reducedMotion = "no-preference") {
   if (viewport.width >= 1024 && !viewport.touch) {
     await page.waitForFunction(() => document.querySelector("#lab")?.getAttribute("data-fullpage-active") === "true");
   } else {
-    await page.locator("#lab").scrollIntoViewIfNeeded();
+    await page.locator("#lab").evaluate((section) => section.scrollIntoView({ block: "start", behavior: "instant" }));
+    await page.waitForTimeout(120);
   }
   await page.locator("#lab article[data-active='true'] img").first().waitFor({ state: "visible", timeout: 30_000 });
-  await page.waitForTimeout(900);
+  await page.waitForFunction(
+    () => document.querySelector("#lab [data-lab-visible]")?.getAttribute("data-lab-visible") === "true",
+    undefined,
+    { timeout: reducedMotion === "reduce" ? 4_000 : 10_000 },
+  );
+  await page.waitForTimeout(reducedMotion === "reduce" ? 300 : 1800);
   return { context, errors, page };
 }
 
@@ -43,6 +49,7 @@ function activeTitle(page) {
 const requestedViewport = process.env.LAB_QA_VIEWPORT;
 const viewports = [
   { name: "reference-1920", width: 1920, height: 1080 },
+  { name: "mockup-1536", width: 1551, height: 1096 },
   { name: "desktop-1600", width: 1600, height: 900 },
   { name: "desktop-1366", width: 1366, height: 768 },
   { name: "desktop", width: 1440, height: 900 },
@@ -53,7 +60,7 @@ const viewports = [
 
 for (const viewport of viewports) {
   const { context, errors, page } = await prepare(viewport);
-  const metrics = await page.locator("#lab").evaluate((section) => {
+  const metrics = await page.locator("#lab").evaluate(async (section) => {
     const active = section.querySelector("article[data-active='true'] > div")?.getBoundingClientRect();
     const sectionRect = section.getBoundingClientRect();
     const visibleCards = [...section.querySelectorAll("article[data-card]")]
@@ -62,6 +69,13 @@ for (const viewport of viewports) {
     const navigation = document.querySelector("[data-home-navigation]");
     const explorer = section.querySelector("[class*='explorer']");
     const handwritten = section.querySelector("[class*='handNote']");
+    const manualIntersectionRatio = explorer ? await new Promise((resolve) => {
+      const observer = new IntersectionObserver(([entry]) => {
+        resolve(entry?.intersectionRatio ?? -1);
+        observer.disconnect();
+      });
+      observer.observe(explorer);
+    }) : -1;
     const requiredLabels = ["crm", "dashboard", "tracking", "api"].map((key) => {
       const card = section.querySelector(`article[data-card='${key}']`);
       const label = card?.querySelector("strong");
@@ -86,6 +100,11 @@ for (const viewport of viewports) {
       .map((card) => ({ card: card.getAttribute("data-card"), offset: Number(card.getAttribute("data-offset")) }));
     return {
       activeInsideViewport: Boolean(active && active.left >= -1 && active.right <= innerWidth + 1),
+      activationExists: Boolean(section.querySelector("[data-testid='lab-activation']")),
+      explorerVisibleState: explorer?.getAttribute("data-lab-visible") ?? null,
+      explorerRect: explorer ? (() => { const rect = explorer.getBoundingClientRect(); return [Math.round(rect.top), Math.round(rect.bottom), Math.round(rect.height), innerHeight]; })() : null,
+      opacityChain: [section, explorer, explorer?.querySelector("h2"), explorer?.querySelector("article[data-active='true']")].map((element) => element ? getComputedStyle(element).opacity : null),
+      manualIntersectionRatio,
       cardCount: section.querySelectorAll("article").length,
       documentOverflow: Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth),
       explorerFont: explorer ? getComputedStyle(explorer).fontFamily : null,
@@ -102,6 +121,7 @@ for (const viewport of viewports) {
     };
   });
   await page.locator("#lab").screenshot({ path: `${output}/lab-${viewport.name}.png` });
+  if (viewport.touch) await page.screenshot({ path: `${output}/lab-${viewport.name}-viewport.png` });
   if (viewport.name === "reference-1920") await page.screenshot({ path: `${output}/lab-reference-1920-with-nav.png` });
   results.push({ errors, metrics, viewport: viewport.name });
   await context.close();

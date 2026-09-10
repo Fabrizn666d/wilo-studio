@@ -25,7 +25,7 @@ export function InternationalScene() {
           <p className={styles.intro} data-reveal="copy">Wilo Studio nació en Arequipa, Perú. Hoy nuestra estructura nos permite desarrollar proyectos, coordinar equipos y atender a clientes dentro y fuera del país.</p>
           <div className={styles.entities} data-reveal="cards">
             <a href="/contacto" className={styles.entity}><span className={styles.entityMark}>w<span>ilo</span><small>STUDIO</small></span><span><strong>WILO GLOBAL INDUSTRIES LLC</strong><small>United States</small><small>Facturación internacional</small></span><ArrowUpRight size={20} /></a>
-            <a href="/contacto" className={styles.entity}><span className={styles.entityMark}>w<span>ilo</span><small>STUDIO</small></span><span><strong>WILO INDUSTRIES GROUP S.A.C.</strong><small>Perú</small><small>Facturación peruana</small></span><ArrowUpRight size={20} /></a>
+            <a href="/contacto" className={styles.entity}><span className={styles.entityMark}>w<span>ilo</span><small>STUDIO</small></span><span><strong>WILO INDUSTRIES GROUP E.I.R.L.</strong><small>Perú</small><small>Facturación peruana</small></span><ArrowUpRight size={20} /></a>
           </div>
           <div className={styles.internationalBenefits} data-reveal="details"><span><Globe2 />Atención<br />remota</span><span><UsersRound />Proyectos<br />sin fronteras</span><span><ChartNoAxesCombined />Mismos estándares<br />de calidad</span></div>
           <p className={styles.handNote} data-reveal="note">Las buenas ideas<br />no necesitan pasaporte.</p>

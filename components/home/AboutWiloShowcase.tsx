@@ -3,13 +3,6 @@
 import {
   ArrowLeft,
   ArrowRight,
-  Camera,
-  CodeXml,
-  Cog,
-  Globe2,
-  Lightbulb,
-  MapPin,
-  Network,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -31,7 +24,7 @@ const capabilities = [
     number: "01",
     name: "Desarrollo web",
     description: "Sitios corporativos · Tiendas · Plataformas · Apps",
-    image: "/ecosystem/studio/studio-devices.png",
+    image: "/images/wilo/about/web-night.png",
     alt: "Composición de soluciones web creadas por Wilo Studio",
     color: "#3978f6",
   },
@@ -40,7 +33,7 @@ const capabilities = [
     number: "02",
     name: "Producción audiovisual",
     description: "Foto · Video · Contenido",
-    image: "/images/wilo/generated/audiovisual-set-v2.webp",
+    image: "/images/wilo/about/audiovisual-night.png",
     alt: "Set de producción audiovisual profesional",
     color: "#ff5d73",
   },
@@ -49,7 +42,7 @@ const capabilities = [
     number: "03",
     name: "Sistemas y plataformas",
     description: "Operación · Datos · Dashboards",
-    image: "/services/platforms/visual.webp",
+    image: "/images/wilo/about/systems-night.png",
     alt: "Plataforma digital y paneles de operación",
     color: "#14b8a6",
   },
@@ -58,7 +51,7 @@ const capabilities = [
     number: "04",
     name: "Educación y robótica",
     description: "Talleres · Kits · Programación",
-    image: "/images/wilo/generated/education-robot-v2.webp",
+    image: "/images/wilo/about/education-night.png",
     alt: "Robot educativo de Wilo Education",
     color: "#7c4dff",
   },
@@ -67,7 +60,7 @@ const capabilities = [
     number: "05",
     name: "Wilo Events",
     description: "Producción técnica · Escenarios · Experiencias",
-    image: "/images/wilo/generated/events-stage-v2.webp",
+    image: "/images/wilo/about/events-night.png",
     alt: "Producción técnica de un evento corporativo",
     color: "#ff5d73",
   },
@@ -76,7 +69,7 @@ const capabilities = [
     number: "06",
     name: "Automatización e infraestructura",
     description: "APIs · Flujos · Cloud · Integraciones",
-    image: "/services/automation/visual.webp",
+    image: "/images/wilo/about/automation-night.png",
     alt: "Flujos de automatización e infraestructura digital",
     color: "#14b8a6",
   },
@@ -89,36 +82,25 @@ const stats = [
   { value: 100, suffix: "%", label: "Clientes satisfechos", color: "#ff5d73" },
 ] as const;
 
-const capabilityRail = [
-  { name: "Digital", detail: "Webs · Tiendas · Sistemas · Apps", color: "#3978f6", icon: CodeXml },
-  { name: "Producción", detail: "Fotografía · Video · Contenido · Campañas", color: "#ff5d73", icon: Camera },
-  { name: "Operación", detail: "APIs · Automatización · Correos · Infraestructura", color: "#14b8a6", icon: Cog },
-  { name: "Ecosistema", detail: "Studio · Express · Education · Events · Store", color: "#7c4dff", icon: Network },
-] as const;
-
 const clientMarks = [
-  { name: "Tecnova Perú", logo: "/images/logo-tecnova.png" },
-  { name: "Global Norte", logo: "/images/logo-globalnorte.png" },
-  { name: "IBEX" },
-  { name: "Biciem Ultra Trail" },
-  { name: "Reuse" },
-  { name: "Dayun", logo: "/images/logo-dayun.png" },
-  { name: "Hingenia" },
-  { name: "Geoingenieros" },
-] as const;
-
-const reachItems = [
-  { title: "Arequipa", text: "Nuestro origen", icon: MapPin, color: "#3978f6" },
-  { title: "Todo el Perú", text: "Nuestra cobertura nacional", icon: MapPin, color: "#14b8a6" },
-  { title: "Todo el mundo", text: "Soluciones digitales sin fronteras", icon: Globe2, color: "#7c4dff" },
-  { title: "Ideas que funcionan", text: "Nuestra esencia", icon: Lightbulb, color: "#ff5d73" },
+  { name: "Tecnova Perú", logo: "/images/wilo/about/logos/tecnova.svg", width: 170 },
+  { name: "Global Norte", logo: "/images/wilo/about/logos/global-norte.svg", width: 208 },
+  { name: "IBEX", logo: "/images/wilo/about/logos/ibex.svg", width: 154 },
+  { name: "Biciem Ultra Trail", logo: "/images/wilo/about/logos/biciem.svg", width: 184 },
+  { name: "Reuse", logo: "/images/wilo/about/logos/reuse.svg", width: 154 },
+  { name: "Dayun Perú", logo: "/images/wilo/about/logos/dayun.svg", width: 166 },
+  { name: "Hingenia", logo: "/images/wilo/about/logos/hingenia.svg", width: 180 },
+  { name: "Geoingenieros", logo: "/images/wilo/about/logos/geoingenieros.svg", width: 220 },
 ] as const;
 
 const visualOrder = [2, 1, 0, 3, 4, 5];
 const INITIAL_PHASE = 2;
 const CARD_TRAVEL_MS = 7200;
-const SNAP_STIFFNESS = 190;
-const SNAP_DAMPING = 26;
+const SNAP_STIFFNESS = 225;
+const SNAP_DAMPING = 29;
+const SNAP_HOLD_MS = 3200;
+const AUTOPLAY_WELL_HOLD_MS = 700;
+const AUTOPLAY_WELL_THRESHOLD = 0.012;
 
 function wrapOffset(value: number) {
   const length = capabilities.length;
@@ -127,6 +109,10 @@ function wrapOffset(value: number) {
 
 function easeOutCubic(progress: number) {
   return 1 - Math.pow(1 - progress, 3);
+}
+
+function progressRange(progress: number, start: number, end: number) {
+  return Math.max(0, Math.min(1, (progress - start) / (end - start)));
 }
 
 function relativePosition(index: number, activeIndex: number) {
@@ -141,11 +127,21 @@ export function AboutWiloShowcase() {
   const rootRef = useRef<HTMLElement | null>(null);
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const pointer = useRef({ id: -1, startX: 0, startPhase: INITIAL_PHASE, x: 0, time: 0, velocityX: 0 });
+  const pointer = useRef({
+    id: -1,
+    startX: 0,
+    startY: 0,
+    startPhase: INITIAL_PHASE,
+    x: 0,
+    time: 0,
+    velocityX: 0,
+    axis: "idle" as "idle" | "pending" | "x" | "y",
+  });
   const phaseRef = useRef(INITIAL_PHASE);
   const phaseVelocityRef = useRef(0);
   const phaseTargetRef = useRef<number | null>(null);
   const resumeAtRef = useRef(0);
+  const autoplayWellRef = useRef({ index: Math.round(INITIAL_PHASE) - 1, until: 0 });
   const sceneProgressRef = useRef(0);
   const sceneNearRef = useRef(false);
   const interactionPausedRef = useRef(false);
@@ -194,9 +190,23 @@ export function AboutWiloShowcase() {
       sceneProgressRef.current = progress;
       sceneNearRef.current = relevant && progress >= 0.06;
       section.style.setProperty("--about-progress", progress.toFixed(4));
+      const revealStages = {
+        eyebrow: progressRange(progress, 0.05, 0.18),
+        statement: progressRange(progress, 0.10, 0.25),
+        headlineOne: progressRange(progress, 0.14, 0.34),
+        headlineTwo: progressRange(progress, 0.21, 0.40),
+        subhead: progressRange(progress, 0.30, 0.48),
+        bodyOne: progressRange(progress, 0.37, 0.52),
+        bodyTwo: progressRange(progress, 0.41, 0.56),
+        cta: progressRange(progress, 0.44, 0.62),
+        carousel: progressRange(progress, 0.16, 0.52),
+      };
+      Object.entries(revealStages).forEach(([name, value]) => {
+        section.style.setProperty(`--reveal-${name}`, value.toFixed(4));
+      });
       const active = relevant && progress >= 0.08;
       setSectionActive(active);
-      setCountEligible(relevant && progress >= 0.56);
+      setCountEligible(relevant && progress >= 0.55);
       setMotionReady(true);
     };
     const requestMeasure = () => {
@@ -233,7 +243,7 @@ export function AboutWiloShowcase() {
       return;
     }
     setCountValues(stats.map(() => 0));
-    const startedAt = performance.now() + 150;
+    const startedAt = performance.now();
     const durations = [1900, 1050, 900, 1400];
     const tick = (now: number) => {
       let running = false;
@@ -256,9 +266,7 @@ export function AboutWiloShowcase() {
       const carousel = carouselRef.current;
       if (!carousel) return;
       const width = carousel.clientWidth || 800;
-      const entry = reducedMotion
-        ? 1
-        : Math.max(0, Math.min(1, (sceneProgressRef.current - 0.08) / 0.34));
+      const entry = reducedMotion ? 1 : progressRange(sceneProgressRef.current, 0.16, 0.52);
       const phase = phaseRef.current;
       const nearestOrder = ((Math.round(phase) % capabilities.length) + capabilities.length) % capabilities.length;
       const nearestIndex = visualOrder[nearestOrder];
@@ -274,15 +282,21 @@ export function AboutWiloShowcase() {
         const offset = wrapOffset(order - phase);
         const absolute = Math.abs(offset);
         const sign = Math.sign(offset);
-        const spread = compactViewport ? 0.64 : 0.45;
-        const naturalX = sign * width * spread * (1 - Math.exp(-absolute * 0.92));
-        const naturalZ = 120 - Math.min(absolute, 2.5) * 235;
+        const spread = compactViewport
+          ? Math.min(0.82, absolute * 0.5 - absolute * absolute * 0.04)
+          : Math.min(0.52, absolute * 0.3 - absolute * absolute * 0.03);
+        const naturalX = sign * width * Math.max(0, spread);
+        const naturalZ = 100 - Math.min(absolute, 1) * 200 - Math.max(0, absolute - 1) * 115;
         const naturalY = absolute * (compactViewport ? 5 : 8);
-        const naturalScale = Math.max(0.7, 1.06 - absolute * 0.155);
-        const naturalRotateY = -sign * Math.min(19, absolute * 13.5);
+        const naturalScale = Math.max(0.72, 1 - Math.min(absolute, 1) * 0.085 - Math.max(0, absolute - 1) * 0.095);
+        const naturalRotateY = -sign * Math.min(20, absolute * 12);
         const naturalRotateZ = sign * Math.min(5, absolute * 2.8);
-        const edgeFade = absolute > 2.2 ? Math.max(0, 1 - (absolute - 2.2) / 0.55) : 1;
-        const naturalOpacity = Math.max(0.5, 1 - absolute * 0.2) * edgeFade;
+        const edgeFade = absolute > 2.55 ? Math.max(0, 1 - (absolute - 2.55) / 0.4) : 1;
+        const desktopOpacity = Math.max(0.4, 1 - Math.min(absolute, 1) * 0.06 - Math.max(0, absolute - 1) * 0.18);
+        const mobileVisibility = compactViewport
+          ? Math.max(0, 1 - Math.max(0, absolute - 1.45) / 0.25)
+          : 1;
+        const naturalOpacity = desktopOpacity * edgeFade * mobileVisibility;
         const depthParallax = Math.max(-1.5, 0.75 - absolute * 1.125);
         const x = naturalX * entry + parallaxRef.current.x * depthParallax;
         const y = 24 * (1 - entry) + naturalY * entry + parallaxRef.current.y * depthParallax;
@@ -291,10 +305,11 @@ export function AboutWiloShowcase() {
         const rotateY = naturalRotateY * entry;
         const rotateZ = naturalRotateZ * entry;
         const opacity = 0.22 + (naturalOpacity - 0.22) * entry;
-        const blur = (1 - entry) * 3.5 + Math.max(0, absolute - 1.2) * 0.7;
+        const blur = (1 - entry) * 3.5 + Math.max(0, absolute - 1.25) * 0.42;
+        const saturation = Math.max(0.8, 1 - absolute * 0.065);
         card.style.transform = `translate3d(calc(-50% + ${x.toFixed(2)}px), calc(-50% + ${y.toFixed(2)}px), ${z.toFixed(2)}px) rotateY(${rotateY.toFixed(2)}deg) rotateZ(${rotateZ.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
         card.style.opacity = opacity.toFixed(3);
-        card.style.filter = `blur(${blur.toFixed(2)}px) saturate(${(0.76 + entry * 0.24).toFixed(3)})`;
+        card.style.filter = `blur(${blur.toFixed(2)}px) saturate(${(0.76 + entry * (saturation - 0.76)).toFixed(3)})`;
         card.style.zIndex = String(100 - Math.round(absolute * 20));
         card.dataset.phaseOffset = offset.toFixed(3);
       });
@@ -309,6 +324,7 @@ export function AboutWiloShowcase() {
           phaseRef.current = phaseTargetRef.current;
           phaseVelocityRef.current = 0;
           phaseTargetRef.current = null;
+          resumeAtRef.current = Number.POSITIVE_INFINITY;
         } else {
           const step = Math.min(0.032, delta / 1000);
           const distance = phaseRef.current - phaseTargetRef.current;
@@ -319,13 +335,25 @@ export function AboutWiloShowcase() {
             phaseRef.current = phaseTargetRef.current;
             phaseVelocityRef.current = 0;
             phaseTargetRef.current = null;
+            resumeAtRef.current = now + SNAP_HOLD_MS;
+            autoplayWellRef.current.index = Math.round(phaseRef.current);
           }
         }
       } else if (!reducedMotion && sceneNearRef.current && !interactionPausedRef.current && now >= resumeAtRef.current) {
-        const fractional = Math.abs(phaseRef.current - Math.round(phaseRef.current));
-        const orbitEase = 0.68 + Math.sin(Math.min(1, fractional * 2) * Math.PI / 2) * 0.32;
-        const hoverFactor = hoverSlowRef.current ? 0.14 : 1;
-        phaseRef.current += (delta / CARD_TRAVEL_MS) * orbitEase * hoverFactor;
+        const nearest = Math.round(phaseRef.current);
+        const wellDistance = Math.abs(phaseRef.current - nearest);
+        const well = autoplayWellRef.current;
+        if (now >= well.until) {
+          if (wellDistance <= AUTOPLAY_WELL_THRESHOLD && nearest !== well.index) {
+            phaseRef.current = nearest;
+            well.index = nearest;
+            well.until = now + AUTOPLAY_WELL_HOLD_MS;
+          } else {
+            const magneticSpeed = 0.28 + Math.min(1, wellDistance / 0.16) * 0.72;
+            const hoverFactor = hoverSlowRef.current ? 0.14 : 1;
+            phaseRef.current += (delta / CARD_TRAVEL_MS) * magneticSpeed * hoverFactor;
+          }
+        }
       }
       renderCards();
       carouselFrame.current = window.requestAnimationFrame(tick);
@@ -344,14 +372,14 @@ export function AboutWiloShowcase() {
   const moveBy = (direction: -1 | 1) => {
     phaseVelocityRef.current = 0;
     phaseTargetRef.current = Math.round(phaseRef.current) + direction;
-    resumeAtRef.current = performance.now() + 2200;
+    resumeAtRef.current = Number.POSITIVE_INFINITY;
   };
 
   const moveToCard = (index: number) => {
     const order = visualOrder.indexOf(index);
     phaseVelocityRef.current = 0;
     phaseTargetRef.current = phaseRef.current + wrapOffset(order - phaseRef.current);
-    resumeAtRef.current = performance.now() + 2200;
+    resumeAtRef.current = Number.POSITIVE_INFINITY;
   };
 
   const onScenePointerMove = (event: PointerEvent<HTMLElement>) => {
@@ -376,34 +404,55 @@ export function AboutWiloShowcase() {
     pointer.current = {
       id: event.pointerId,
       startX: event.clientX,
+      startY: event.clientY,
       startPhase: phaseRef.current,
       x: event.clientX,
       time: performance.now(),
       velocityX: 0,
+      axis: event.pointerType === "mouse" ? "x" : "pending",
     };
-    phaseVelocityRef.current = 0;
-    phaseTargetRef.current = null;
     suppressClick.current = false;
-    setDragging(true);
-    event.currentTarget.setPointerCapture(event.pointerId);
+    if (event.pointerType === "mouse") {
+      phaseVelocityRef.current = 0;
+      phaseTargetRef.current = null;
+      resumeAtRef.current = Number.POSITIVE_INFINITY;
+      setDragging(true);
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
   };
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (pointer.current.id !== event.pointerId) return;
+    const distanceX = event.clientX - pointer.current.startX;
+    const distanceY = event.clientY - pointer.current.startY;
+    if (pointer.current.axis === "pending") {
+      if (Math.max(Math.abs(distanceX), Math.abs(distanceY)) < 8) return;
+      if (Math.abs(distanceY) > Math.abs(distanceX)) {
+        pointer.current.axis = "y";
+        pointer.current.id = -1;
+        return;
+      }
+      pointer.current.axis = "x";
+      phaseVelocityRef.current = 0;
+      phaseTargetRef.current = null;
+      resumeAtRef.current = Number.POSITIVE_INFINITY;
+      setDragging(true);
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+    if (pointer.current.axis !== "x") return;
     const time = performance.now();
     const width = carouselRef.current?.clientWidth || 800;
     const step = width * (compactViewport ? 0.5 : 0.36);
     pointer.current.velocityX = (event.clientX - pointer.current.x) / Math.max(1, time - pointer.current.time);
     pointer.current.x = event.clientX;
     pointer.current.time = time;
-    const distance = event.clientX - pointer.current.startX;
-    suppressClick.current = Math.abs(distance) > 7;
-    phaseRef.current = pointer.current.startPhase - distance / step;
+    suppressClick.current = Math.abs(distanceX) > 7;
+    phaseRef.current = pointer.current.startPhase - distanceX / step;
     renderCarouselRef.current();
   };
 
   const endPointer = (event: PointerEvent<HTMLDivElement>, cancelled = false) => {
-    if (pointer.current.id === event.pointerId) {
+    if (pointer.current.id === event.pointerId && pointer.current.axis === "x") {
       const width = carouselRef.current?.clientWidth || 800;
       const step = width * (compactViewport ? 0.5 : 0.36);
       if (cancelled) {
@@ -419,9 +468,10 @@ export function AboutWiloShowcase() {
         phaseVelocityRef.current = releaseVelocity;
         phaseTargetRef.current = target;
       }
-      resumeAtRef.current = performance.now() + 2000;
+      resumeAtRef.current = Number.POSITIVE_INFINITY;
     }
     pointer.current.id = -1;
+    pointer.current.axis = "idle";
     setDragging(false);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
@@ -449,7 +499,6 @@ export function AboutWiloShowcase() {
       <ViewportFrame className={styles.frame} size="wide">
         <div className={styles.mainComposition}>
           <div className={styles.copy}>
-            <span className={styles.eyebrow}><b>02</b><i /> SOBRE WILO STUDIO</span>
             <p className={styles.statement}>NO USAMOS WORDPRESS.</p>
             <h2 id="about-wilo-title">
               <span className={styles.headlineLine}><em>NUESTRO LÍMITE</em></span>
@@ -534,31 +583,35 @@ export function AboutWiloShowcase() {
           ))}
         </div>
 
-        <div className={styles.capabilityRail}>
-          {capabilityRail.map((item) => {
-            const Icon = item.icon;
-            return <div key={item.name} style={{ "--rail-color": item.color } as CSSProperties}><Icon aria-hidden="true" /><span><strong>{item.name}</strong><em>{item.detail}</em></span></div>;
-          })}
-        </div>
-
-        <div className={styles.clientMarquee} aria-label="Carrusel infinito de marcas y proyectos de Wilo Studio">
-          <p>MARCAS Y PROYECTOS<br />QUE CONFÍAN EN WILO</p>
-          <div className={styles.marqueeViewport}>
-            <div className={styles.marqueeTrack}>
-              {[...clientMarks, ...clientMarks].map((item, index) => (
-                <span aria-hidden={index >= clientMarks.length} className={styles.clientMark} key={`${item.name}-${index}`}>
-                  {"logo" in item ? <Image alt={index < clientMarks.length ? item.name : ""} height={48} src={item.logo} width={120} /> : <b>{item.name}</b>}
-                </span>
-              ))}
+        <div className={styles.logoMarquee} aria-label="Marcas y proyectos que confían en Wilo Studio">
+          <header className={styles.logoHeading}>
+            <span>MARCAS Y PROYECTOS</span>
+            <strong>QUE CONFÍAN EN WILO</strong>
+          </header>
+          <div className={styles.logoMarqueeViewport}>
+            <div className={styles.logoMarqueeTrack}>
+            {[0, 1].map((sequence) => (
+              <div aria-hidden={sequence === 1} className={styles.logoMarqueeSequence} key={sequence}>
+                {clientMarks.map((item) => (
+                  <span
+                    className={styles.logoCell}
+                    key={`${sequence}-${item.name}`}
+                    style={{ "--logo-width": `${item.width}px` } as CSSProperties}
+                  >
+                    <Image
+                      alt={sequence === 0 ? item.name : ""}
+                      height={64}
+                      loading="lazy"
+                      sizes="(max-width: 640px) 150px, 220px"
+                      src={item.logo}
+                      width={item.width}
+                    />
+                  </span>
+                ))}
+              </div>
+            ))}
             </div>
           </div>
-        </div>
-
-        <div className={styles.reachStrip}>
-          {reachItems.map((item) => {
-            const Icon = item.icon;
-            return <div key={item.title} style={{ "--reach-color": item.color } as CSSProperties}><Icon aria-hidden="true" /><span><strong>{item.title}</strong><small>{item.text}</small></span></div>;
-          })}
         </div>
       </ViewportFrame>
     </FullBleedSection>

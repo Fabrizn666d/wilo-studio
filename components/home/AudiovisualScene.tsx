@@ -24,14 +24,14 @@ const services = [
 
 export function AudiovisualScene() {
   return (
-    <FullBleedSection id="audiovisual" className={`${styles.section} ${styles.audiovisual}`} aria-labelledby="audiovisual-title" data-scene-theme="light" spacing="scene">
+    <FullBleedSection id="audiovisual" className={`${styles.section} ${styles.audiovisual} ${styles.audiovisualHero}`} aria-labelledby="audiovisual-title" data-scene-theme="light" spacing="scene">
       <ViewportFrame size="wide" className={styles.sceneFrame}>
         <div className={styles.audiovisualTop}>
           <div className={styles.avCopy}>
             <span className={styles.eyebrow} data-reveal="detail">06 <i /> PRODUCCIÓN AUDIOVISUAL</span>
-            <h2 id="audiovisual-title" data-reveal="title">UNA IDEA<br />NO SOLO SE CUENTA.<br /><em>SE HACE SENTIR.</em></h2>
+            <h1 className={styles.avTitle} id="audiovisual-title" data-reveal="title">UNA IDEA<br />NO SOLO SE CUENTA.<br /><em>SE HACE SENTIR.</em></h1>
             <p data-reveal="detail">Creamos contenido que conecta, emociona y genera resultados reales para tu marca.</p>
-            <Link className={styles.darkButton} href="/servicios/produccion-audiovisual" data-reveal="detail">Explorar producción <ArrowUpRight aria-hidden="true" /></Link>
+            <Link className={styles.darkButton} href="#capacidades" data-reveal="detail">Explorar producción <ArrowUpRight aria-hidden="true" /></Link>
             <ul className={styles.avServices} data-reveal="detail">{services.map(({ Icon, title }) => <li key={title}><Icon aria-hidden="true" /><span>{title}</span></li>)}</ul>
           </div>
           <EditorialTilt className={styles.contactSheet}>

@@ -203,11 +203,18 @@ model Order {
   documentNumber       String?
   companyName          String?
   companyRuc           String?
+  department           String?
+  province             String?
+  district             String?
+  address              String?
+  addressReference     String?
   paymentMethod        String
   status               String      @default("PENDING")
   currency             String      @default("PEN")
   subtotalCents        Int
   taxCents             Int         @default(0)
+  discountCents        Int         @default(0)
+  promoCode            String?
   totalCents           Int
   voucherUrl           String?
   paymentReference     String?
@@ -303,6 +310,14 @@ model Promotion {
   details         String    @default("[]")
   imageUrl        String?
   referralBenefit String?
+  code            String?   @unique
+  discountType    String?
+  discountValue   Int?
+  minimumCents    Int       @default(0)
+  maxUses         Int?
+  usedCount       Int       @default(0)
+  categorySlugs   String    @default("[]")
+  productIds      String    @default("[]")
   startAt         DateTime?
   endAt           DateTime?
   active          Boolean   @default(false)

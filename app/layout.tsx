@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import localFont from "next/font/local";
 import "@fontsource-variable/inter";
 import { ClientShell } from "@/components/client-shell";
 import { siteConfig } from "@/lib/content";
 import { getPublicSiteSettings } from "@/lib/site-settings";
+import { getLocaleOption, isLocale, localeCookieName, translate, type Locale } from "@/lib/i18n";
 import "./globals.css";
 
 const flexo = localFont({
@@ -54,7 +56,9 @@ const localBusiness = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const settings = await getPublicSiteSettings();
+  const [settings, cookieStore] = await Promise.all([getPublicSiteSettings(), cookies()]);
+  const cookieLocale = cookieStore.get(localeCookieName)?.value;
+  const initialLocale: Locale = isLocale(cookieLocale) ? cookieLocale : "es";
   const structuredBusiness = {
     ...localBusiness,
     name: settings.name,
@@ -65,10 +69,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     ...(settings.emailVerified ? { email: settings.email } : {}),
   };
   return (
-    <html lang="es" className={flexo.variable}>
+    <html lang={getLocaleOption(initialLocale).htmlLang} className={flexo.variable}>
       <body>
-        <a className="skip-link" href="#contenido">Saltar al contenido</a>
-        <ClientShell settings={settings}>
+        <a className="skip-link" href="#contenido" data-i18n-message="a11y.skip">{translate(initialLocale, "a11y.skip")}</a>
+        <ClientShell settings={settings} initialLocale={initialLocale}>
           {children}
         </ClientShell>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredBusiness).replace(/</g, "\\u003c") }} />

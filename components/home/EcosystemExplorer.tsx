@@ -104,7 +104,7 @@ export function EcosystemExplorer({ lines }: { lines: readonly EcosystemLine[] }
             <div className={styles.cardIndex}><strong>01</strong><span>DIGITAL</span></div>
             <h3>Wilo Studio</h3>
             <p>Web, sistemas, aplicaciones y automatización a medida.</p>
-            <Link href={href("studio", "/servicios")}>Conocer Studio <ArrowUpRight aria-hidden="true" /></Link>
+            <Link href={href("studio", "/#servicios")}>Conocer Studio <ArrowUpRight aria-hidden="true" /></Link>
           </div>
           <Image className={`${styles.deviceArt} ${styles.mediaReveal}`} src="/ecosystem/studio/studio-devices.png" alt="Wilo Studio mostrado en una laptop y una tienda digital en celular" width={1800} height={1140} sizes="(max-width: 760px) 92vw, 48vw" />
         </article>
@@ -115,7 +115,7 @@ export function EcosystemExplorer({ lines }: { lines: readonly EcosystemLine[] }
             <div className={styles.cardIndex}><strong>02</strong><span>EXPRESS</span></div>
             <h3>Wilo <em>Express</em></h3>
             <p>Webs rápidas, administrables y profesionales para lanzar tu negocio sin complicaciones.</p>
-            <Link href={href("express", "/express")}>Conocer Express <ArrowUpRight aria-hidden="true" /></Link>
+            <Link href={href("express", process.env.NEXT_PUBLIC_WILO_EXPRESS_URL || "https://wilo.site")}>Conocer Express <ArrowUpRight aria-hidden="true" /></Link>
           </div>
           <Image className={`${styles.deviceArt} ${styles.mediaReveal}`} src="/ecosystem/express/express-devices.png" alt="La web real de Wilo Express presentada en laptop y celular" width={1800} height={1140} sizes="(max-width: 760px) 92vw, 48vw" />
           <FeatureRow group="express" />

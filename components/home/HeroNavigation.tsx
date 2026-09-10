@@ -4,17 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import styles from "./hero-wilo.module.css";
+import { LanguageSwitcher } from "../language-switcher";
+import { useI18n } from "../i18n-provider";
 
 const heroLinks = [
-  { label: "Trabajos", href: "/#trabajos" },
-  { label: "Proyectos", href: "/proyectos" },
-  { label: "Servicios", href: "/#servicios" },
-  { label: "Nosotros", href: "/#nosotros" },
-  { label: "Ecosistema", href: "/#ecosistema" },
-  { label: "Contacto", href: "/contacto" },
+  { label: "nav.work", href: "/#trabajos" },
+  { label: "nav.projects", href: "/proyectos" },
+  { label: "nav.services", href: "/#servicios" },
+  { label: "nav.about", href: "/#sobre-wilo" },
+  { label: "nav.ecosystem", href: "/#ecosistema" },
+  { label: "nav.contact", href: "/contacto" },
 ] as const;
 
 export function HeroNavigation() {
+  const { t } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("inicio");
@@ -103,28 +106,29 @@ export function HeroNavigation() {
     <header
       className={`${styles.navigation} ${scrolled ? styles.navigationScrolled : ""} ${labTheme ? styles.navigationLab : ""}`}
       data-home-navigation
+      data-i18n-manual
       data-theme={labTheme ? "lab" : "default"}
       data-scene-tone={lightScene ? "light" : "dark"}
     >
       <div className={styles.navigationInner}>
         {logo}
-        <nav className={styles.desktopNavigation} aria-label="Navegación del inicio">
+        <nav className={styles.desktopNavigation} aria-label={t("a11y.homeNavigation")}>
           {heroLinks.map((item) => {
             const id = item.href.startsWith("/#") ? item.href.slice(2) : "";
             const isActive = Boolean(id && id === activeSection);
-            return <Link aria-current={isActive ? "location" : undefined} data-active={isActive} href={item.href} key={item.href}>{item.label}</Link>;
+            return <Link aria-current={isActive ? "location" : undefined} data-active={isActive} href={item.href} key={item.href}>{t(item.label)}</Link>;
           })}
         </nav>
         <div className={styles.navigationActions}>
-          <span className={styles.locale} aria-label="Idioma: español">ES <i aria-hidden="true">⌄</i></span>
+          <LanguageSwitcher compact />
           <Link className={styles.navigationCta} href="/contacto#cotizador">
-            Iniciar un proyecto <span aria-hidden="true">↗</span>
+            {t("nav.startProject")} <span aria-hidden="true">↗</span>
           </Link>
           <button
             ref={menuButtonRef}
             className={styles.menuButton}
             type="button"
-            aria-label="Abrir menú"
+            aria-label={t("a11y.openMenu")}
             aria-controls="hero-mobile-navigation"
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen(true)}
@@ -140,7 +144,7 @@ export function HeroNavigation() {
         className={`${styles.mobileNavigation} ${menuOpen ? styles.mobileNavigationOpen : ""}`}
         role="dialog"
         aria-modal="true"
-        aria-label="Menú principal"
+        aria-label={t("a11y.mobileNavigation")}
         aria-hidden={!menuOpen}
         inert={!menuOpen}
       >
@@ -150,19 +154,19 @@ export function HeroNavigation() {
             ref={closeButtonRef}
             className={styles.menuClose}
             type="button"
-            aria-label="Cerrar menú"
+            aria-label={t("a11y.closeMenu")}
             onClick={() => setMenuOpen(false)}
           ><span aria-hidden="true">×</span></button>
         </div>
-        <nav aria-label="Navegación móvil del inicio">
+        <nav aria-label={t("a11y.mobileNavigation")}>
           {heroLinks.map((item, index) => (
             <Link aria-current={item.href === `/#${activeSection}` ? "location" : undefined} data-active={item.href === `/#${activeSection}`} href={item.href} key={item.href} onClick={() => setMenuOpen(false)}>
-              <span>0{index + 1}</span>{item.label}
+              <span>0{index + 1}</span>{t(item.label)}
             </Link>
           ))}
         </nav>
         <Link className={styles.mobileNavigationCta} href="/contacto#cotizador" onClick={() => setMenuOpen(false)}>
-          Iniciar un proyecto <span aria-hidden="true">↗</span>
+          {t("nav.startProject")} <span aria-hidden="true">↗</span>
         </Link>
       </div>
     </header>

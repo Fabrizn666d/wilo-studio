@@ -4,7 +4,7 @@ import { chromium } from "playwright";
 const baseUrl = process.env.ABOUT_WILO_QA_URL || "http://127.0.0.1:3000";
 const executablePath = process.env.PLAYWRIGHT_CHROMIUM_PATH
   || "C:\\Users\\FAbri\\AppData\\Local\\ms-playwright\\chromium-1228\\chrome-win64\\chrome.exe";
-const output = "artifacts/visual/about-wilo/motion-v3";
+const output = "artifacts/visual/about-wilo/motion-final-polish";
 
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true, executablePath });
@@ -82,12 +82,15 @@ await page.waitForTimeout(900);
 const inertia = await snapshot("10-inertia-snap");
 await page.waitForTimeout(650);
 const magneticSnap = await snapshot("11-magnetic-snap-exact");
+await page.waitForTimeout(1_200);
+const magneticHold = await snapshot("12-magnetic-snap-hold");
 
 let smallDragSnap = null;
 let flickBefore = null;
 let flickAfter = null;
 let autoplayBefore = null;
 let autoplayAfter = null;
+const magneticWellSamples = [];
 if (box) {
   const startX = box.x + box.width * 0.58;
   const y = box.y + box.height * 0.48;
@@ -99,7 +102,7 @@ if (box) {
   await page.waitForTimeout(100);
   await page.mouse.up();
   await page.waitForTimeout(1_350);
-  smallDragSnap = await snapshot("12-small-drag-returns");
+  smallDragSnap = await snapshot("13-small-drag-returns");
 
   flickBefore = await page.locator("#sobre-wilo [aria-pressed='true']").getAttribute("data-slide-key");
   await page.mouse.move(startX, y);
@@ -111,9 +114,26 @@ if (box) {
   await page.waitForTimeout(1_450);
   flickAfter = await page.locator("#sobre-wilo [aria-pressed='true']").getAttribute("data-slide-key");
   await page.mouse.move(20, 120);
-  autoplayBefore = await snapshot("13-autoplay-resume-before");
-  await page.waitForTimeout(2_800);
-  autoplayAfter = await snapshot("14-autoplay-resumed");
+  const postFlickHoldStart = await snapshot("14-post-flick-hold-start");
+  await page.waitForTimeout(1_200);
+  const postFlickHoldEnd = await snapshot("15-post-flick-hold-end");
+  autoplayBefore = await snapshot("16-autoplay-resume-before");
+  await page.waitForTimeout(2_600);
+  autoplayAfter = await snapshot("17-autoplay-resumed");
+
+  for (let sample = 0; sample < 105; sample += 1) {
+    const offsets = await page.locator("#sobre-wilo [data-slide-index]").evaluateAll((cards) => (
+      cards.map((card) => Math.abs(Number(card.getAttribute("data-phase-offset"))))
+    ));
+    magneticWellSamples.push(Math.min(...offsets));
+    await page.waitForTimeout(100);
+  }
+
+  const holdDistance = (start, end) => Math.max(...start.cards.map((card, index) => {
+    const raw = Number(card.offset) - Number(end.cards[index]?.offset);
+    return Math.abs(((raw + 3) % 6 + 6) % 6 - 3);
+  }));
+  autoplayBefore.postFlickHoldDistance = holdDistance(postFlickHoldStart, postFlickHoldEnd);
 }
 
 await page.mouse.move(20, 120);
@@ -121,7 +141,7 @@ await page.mouse.wheel(0, -100);
 await page.waitForTimeout(1_200);
 await page.mouse.wheel(0, 100);
 await page.waitForTimeout(1_200);
-const reentry = await snapshot("15-reentry");
+const reentry = await snapshot("18-reentry");
 
 await context.close();
 await browser.close();
@@ -131,6 +151,12 @@ const dragOffsetsChanged = dragMid && dragEnd
   ? dragMid.cards.some((card, index) => card.offset !== dragEnd.cards[index]?.offset)
   : false;
 const nearestOffset = (state) => Math.min(...state.cards.map((card) => Math.abs(Number(card.offset))));
+let longestWellRun = 0;
+let currentWellRun = 0;
+for (const offset of magneticWellSamples) {
+  currentWellRun = offset <= 0.003 ? currentWellRun + 1 : 0;
+  longestWellRun = Math.max(longestWellRun, currentWellRun);
+}
 console.log(JSON.stringify({
   errors,
   transition,
@@ -141,6 +167,11 @@ console.log(JSON.stringify({
     inertia: inertia.cards.map((card) => card.offset),
     settled: magneticSnap.cards.map((card) => card.offset),
     nearestOffset: nearestOffset(magneticSnap),
+    holdNearestOffset: nearestOffset(magneticHold),
+    holdDrift: Math.max(...magneticSnap.cards.map((card, index) => {
+      const raw = Number(card.offset) - Number(magneticHold.cards[index]?.offset);
+      return Math.abs(((raw + 3) % 6 + 6) % 6 - 3);
+    })),
     smallDragNearestOffset: smallDragSnap ? nearestOffset(smallDragSnap) : null,
     flickBefore,
     flickAfter,
@@ -148,5 +179,11 @@ console.log(JSON.stringify({
   autoplayResumed: autoplayBefore && autoplayAfter
     ? autoplayBefore.cards.some((card, index) => card.offset !== autoplayAfter.cards[index]?.offset)
     : false,
+  postFlickHoldDistance: autoplayBefore?.postFlickHoldDistance ?? null,
+  autoplayMagneticWell: {
+    sampledForMs: magneticWellSamples.length * 100,
+    longestExactRunMs: longestWellRun * 100,
+    reachedExactCenter: longestWellRun > 0,
+  },
   reentryCounters: reentry.stats,
 }, null, 2));

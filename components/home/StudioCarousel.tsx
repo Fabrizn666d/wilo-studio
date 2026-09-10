@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowLeft, ArrowRight, ArrowUpRight, MapPin, Monitor, UsersRound, Zap } from "lucide-react";
 import {
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
@@ -102,12 +103,16 @@ export function StudioCarousel({ projects }: { projects: readonly StudioProject[
   const activeIndexRef = useRef(0);
   const animationFrameRef = useRef(0);
   const animationTokenRef = useRef(0);
+  const autoplayDueRef = useRef(0);
   const dragRef = useRef<DragState>({ ...emptyDrag });
   const suppressClickRef = useRef(false);
   const suppressTimerRef = useRef(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [announcement, setAnnouncement] = useState("");
+  const [projectCount, setProjectCount] = useState(0);
+  const [yearsCount, setYearsCount] = useState(0);
+  const countersStartedRef = useRef(false);
   const total = projects.length;
 
   const stageMetrics = useCallback(() => {
@@ -122,8 +127,8 @@ export function StudioCarousel({ projects }: { projects: readonly StudioProject[
       step: mobile
         ? viewportWidth * 0.52
         : tablet
-          ? clamp(viewportWidth * 0.37, slideWidth * 0.5, slideWidth * 0.66)
-          : clamp(viewportWidth * 0.34, slideWidth * 0.52, slideWidth * 0.73),
+          ? clamp(viewportWidth * 0.31, slideWidth * 0.58, slideWidth * 0.7)
+          : clamp(viewportWidth * 0.235, slideWidth * 0.59, slideWidth * 0.68),
       dragDistance: mobile
         ? Math.max(150, viewportWidth * 0.56)
         : clamp(slideWidth * 0.56, 280, 560),
@@ -141,20 +146,38 @@ export function StudioCarousel({ projects }: { projects: readonly StudioProject[
       const distance = shortestDistance(index, position, total);
       const absolute = Math.abs(distance);
       const sign = Math.sign(distance);
-      const visibleLimit = metrics.mobile ? 1.85 : metrics.tablet ? 2.4 : 3.2;
-      const spread = absolute <= 1 ? absolute : 1 + (absolute - 1) * 0.72;
+      const visibleLimit = metrics.mobile ? 1.85 : metrics.tablet ? 2.4 : 2.45;
+      const spread = absolute <= 1 ? absolute : 1 + (absolute - 1) * 0.5;
       const x = sign * metrics.step * spread;
-      const rotation = sign * -(metrics.mobile ? 34 : clamp(42 + absolute * 5, 42, 60));
-      const depth = -Math.pow(absolute, 0.88) * (metrics.mobile ? 135 : metrics.tablet ? 190 : 245);
-      const scale = clamp(1 - absolute * (metrics.mobile ? 0.16 : 0.13), metrics.mobile ? 0.7 : 0.64, 1);
-      const alpha = clamp(1 - absolute * (metrics.mobile ? 0.32 : 0.22), 0.06, 1);
+      const rotation = sign * -(metrics.mobile
+        ? clamp(26 + absolute * 5, 26, 38)
+        : clamp(9 + Math.max(0, absolute - 1) * 6, 9, 19));
+      const depth = metrics.mobile
+        ? -Math.pow(absolute, 0.92) * 135
+        : absolute <= 1
+          ? 90 - absolute * 165
+          : -75 - (absolute - 1) * 90;
+      const scale = absolute <= 1
+        ? 1 - absolute * (metrics.mobile ? 0.17 : 0.2)
+        : clamp(0.8 - (absolute - 1) * 0.18, metrics.mobile ? 0.68 : 0.6, 1);
+      const alpha = absolute <= 1
+        ? 1 - absolute * (metrics.mobile ? 0.28 : 0.02)
+        : clamp(0.98 - (absolute - 1) * 0.14, 0.78, 1);
+      const y = metrics.mobile ? absolute * 8 : Math.pow(absolute, 1.12) * 7;
+      const tilt = metrics.mobile ? 0 : sign * -Math.min(absolute * 0.8, 1.6);
       const isNearest = index === nearest;
 
       slide.style.setProperty("--carousel-x", `${x.toFixed(2)}px`);
+      slide.style.setProperty("--carousel-y", `${y.toFixed(2)}px`);
       slide.style.setProperty("--carousel-z", `${depth.toFixed(2)}px`);
       slide.style.setProperty("--carousel-rotate", `${rotation.toFixed(2)}deg`);
+      slide.style.setProperty("--carousel-tilt", `${tilt.toFixed(2)}deg`);
       slide.style.setProperty("--carousel-scale", scale.toFixed(4));
       slide.style.setProperty("--carousel-alpha", alpha.toFixed(4));
+      slide.style.setProperty("--carousel-entry-x", `${(x * 0.12).toFixed(2)}px`);
+      slide.style.setProperty("--carousel-entry-rotate", `${(rotation * 0.18).toFixed(2)}deg`);
+      slide.style.setProperty("--carousel-entry-scale", absolute < 0.5 ? ".88" : ".74");
+      slide.style.setProperty("--carousel-entry-delay", `${Math.round(Math.min(absolute, 2) * 90)}ms`);
       slide.style.zIndex = String(Math.max(1, 30 - Math.round(absolute * 5)));
       slide.dataset.hidden = absolute > visibleLimit ? "true" : "false";
       slide.dataset.active = isNearest ? "true" : "false";
@@ -220,6 +243,15 @@ export function StudioCarousel({ projects }: { projects: readonly StudioProject[
     animateTo(Math.round(positionRef.current) + delta, true);
   }, [animateTo]);
 
+  const holdAutoplay = useCallback((duration = 6800) => {
+    autoplayDueRef.current = performance.now() + duration;
+  }, []);
+
+  const navigateBy = useCallback((delta: number) => {
+    holdAutoplay();
+    moveBy(delta);
+  }, [holdAutoplay, moveBy]);
+
   useEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport || !total) return;
@@ -241,6 +273,43 @@ export function StudioCarousel({ projects }: { projects: readonly StudioProject[
   }, []);
 
   useEffect(() => {
+    if (!isVisible || reducedMotion || total < 2) return;
+    autoplayDueRef.current = performance.now() + 5200;
+    const timer = window.setInterval(() => {
+      if (dragRef.current.pointerId !== null || performance.now() < autoplayDueRef.current) return;
+      moveBy(1);
+      autoplayDueRef.current = performance.now() + 5200;
+    }, 420);
+    return () => window.clearInterval(timer);
+  }, [isVisible, moveBy, reducedMotion, total]);
+
+  useEffect(() => {
+    if (!isVisible || countersStartedRef.current) return;
+    countersStartedRef.current = true;
+    if (reducedMotion) {
+      setProjectCount(2300);
+      setYearsCount(8);
+      return;
+    }
+    const startedAt = performance.now();
+    const duration = 1350;
+    let frame = 0;
+    const tick = (time: number) => {
+      const progress = clamp((time - startedAt) / duration, 0, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setProjectCount(Math.round(2300 * eased));
+      setYearsCount(Math.round(8 * eased));
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      setProjectCount(2300);
+      setYearsCount(8);
+    };
+  }, [isVisible, reducedMotion]);
+
+  useEffect(() => {
     return () => {
       stopAnimation();
       window.clearTimeout(suppressTimerRef.current);
@@ -256,10 +325,10 @@ export function StudioCarousel({ projects }: { projects: readonly StudioProject[
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key === "ArrowLeft") {
       event.preventDefault();
-      moveBy(-1);
+      navigateBy(-1);
     } else if (event.key === "ArrowRight") {
       event.preventDefault();
-      moveBy(1);
+      navigateBy(1);
     } else if (event.key === "Home") {
       event.preventDefault();
       animateTo(positionRef.current + shortestDistance(0, positionRef.current, total));
@@ -271,6 +340,7 @@ export function StudioCarousel({ projects }: { projects: readonly StudioProject[
 
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
     if (event.button !== 0 || dragRef.current.pointerId !== null) return;
+    holdAutoplay();
     stopAnimation();
     const now = performance.now();
     dragRef.current = {
@@ -327,6 +397,7 @@ export function StudioCarousel({ projects }: { projects: readonly StudioProject[
 
   function selectSlide(index: number) {
     if (suppressClickRef.current) return;
+    holdAutoplay();
     const distance = shortestDistance(index, positionRef.current, total);
     if (Math.abs(distance) > 0.45) animateTo(positionRef.current + distance, true);
   }
@@ -395,38 +466,52 @@ export function StudioCarousel({ projects }: { projects: readonly StudioProject[
                 </div>
                 <div className={styles.deviceBase}><i /></div>
               </div>
-              <div className={styles.slideLabel} aria-hidden="true">
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <strong>{project.name}</strong>
-              </div>
             </article>
           ))}
         </div>
       </div>
 
-      <button className={`${styles.arrow} ${styles.previous}`} onClick={() => moveBy(-1)} type="button" aria-label="Ver proyecto anterior">
-        <span aria-hidden="true">←</span>
-      </button>
-      <button className={`${styles.arrow} ${styles.next}`} onClick={() => moveBy(1)} type="button" aria-label="Ver proyecto siguiente">
-        <span aria-hidden="true">→</span>
-      </button>
-
-      <div className={styles.progress} aria-hidden="true"><i /></div>
-      <p className={styles.instruction}><span>←</span> ARRASTRA O DESLIZA PARA EXPLORAR <span>→</span></p>
-      <p className={styles.live} aria-live="polite" aria-atomic="true">{announcement}</p>
-
-      <div className={styles.activePanel}>
+      <div className={styles.navigation}>
+        <button className={styles.arrow} onClick={() => navigateBy(-1)} type="button" aria-label="Ver proyecto anterior">
+          <ArrowLeft aria-hidden="true" />
+        </button>
+        <div className={styles.dots} aria-label="Seleccionar proyecto">
+          {projects.map((project, index) => (
+            <button
+              aria-label={`Ver ${project.name}`}
+              className={index === activeIndex ? styles.dotActive : undefined}
+              key={project.slug}
+              onClick={() => selectSlide(index)}
+              type="button"
+            />
+          ))}
+        </div>
+        <button className={styles.arrow} onClick={() => navigateBy(1)} type="button" aria-label="Ver proyecto siguiente">
+          <ArrowRight aria-hidden="true" />
+        </button>
         <div className={styles.count} aria-hidden="true">
           <b>{String(activeIndex + 1).padStart(2, "0")}</b><i /><span>{String(total).padStart(2, "0")}</span>
         </div>
+      </div>
+      <p className={styles.instruction}>ARRASTRA O DESLIZA PARA EXPLORAR</p>
+      <p className={styles.live} aria-live="polite" aria-atomic="true">{announcement}</p>
+
+      <div className={styles.activePanel}>
         <div className={styles.activeCopy}>
           <span>PROYECTO SELECCIONADO</span>
           <h3>{activeProject.name}</h3>
           <p>{activeProject.shortDescription}</p>
         </div>
         <Link className={styles.projectLink} href={`/proyectos/${activeProject.slug}`}>
-          Explorar proyecto <span aria-hidden="true">↗</span>
+          Explorar proyecto <ArrowUpRight aria-hidden="true" />
         </Link>
+      </div>
+
+      <div className={styles.projectFooter} aria-label="Identidad de nuestros proyectos">
+        <div><Monitor aria-hidden="true" /><span><strong>+{projectCount}</strong><small>PROYECTOS REALIZADOS</small></span></div>
+        <div><UsersRound aria-hidden="true" /><span><strong>{yearsCount} AÑOS</strong><small>DE EXPERIENCIA</small></span></div>
+        <div><MapPin aria-hidden="true" /><span><strong>DESDE AREQUIPA</strong><small>CREANDO PARA EL MUNDO</small></span></div>
+        <div><Zap aria-hidden="true" /><span><strong>SOLUCIONES A MEDIDA</strong><small>PARA MARCAS EN CRECIMIENTO</small></span></div>
       </div>
     </div>
   );

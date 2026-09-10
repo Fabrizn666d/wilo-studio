@@ -229,6 +229,12 @@ export function FullPageController({ children }: { children: ReactNode }) {
       if (canScrollWithin(event.target, direction)) return;
 
       const sections = getSections();
+      const lastSection = sections.at(-1);
+      if (
+        direction < 0
+        && lastSection
+        && window.scrollY > targetTop(lastSection, sections.length - 1) + 4
+      ) return;
       const baseIndex = animating ? currentIndex : nearestSectionIndex();
       const nextIndex = baseIndex + direction;
       if (nextIndex < 0 || nextIndex >= sections.length) return;
@@ -258,7 +264,14 @@ export function FullPageController({ children }: { children: ReactNode }) {
       if (["ArrowUp", "PageUp"].includes(event.key)) nextIndex = currentIndex - 1;
       if (event.key === "Home") nextIndex = 0;
       if (event.key === "End") nextIndex = getSections().length - 1;
-      if (nextIndex === null || nextIndex < 0 || nextIndex >= getSections().length) return;
+      const sections = getSections();
+      const lastSection = sections.at(-1);
+      if (
+        ["ArrowUp", "PageUp"].includes(event.key)
+        && lastSection
+        && window.scrollY > targetTop(lastSection, sections.length - 1) + 4
+      ) return;
+      if (nextIndex === null || nextIndex < 0 || nextIndex >= sections.length) return;
       event.preventDefault();
       if (!animating && performance.now() >= lockedUntil) goTo(nextIndex, "replace");
     };

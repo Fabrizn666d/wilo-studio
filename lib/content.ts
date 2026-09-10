@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: "Wilo Studio",
-  legalName: "Fabrizio Willys Apaza Calderón",
+  legalName: "WILO INDUSTRIES GROUP E.I.R.L.",
   ruc: "10614138365",
   phoneDisplay: "+51 936 617 557",
   phone: "51936617557",
@@ -12,12 +12,12 @@ export const siteConfig = {
 } as const;
 
 export const primaryNav = [
+  { label: "Trabajos", href: "/#trabajos" },
   { label: "Proyectos", href: "/proyectos" },
-  { label: "Servicios", href: "/servicios" },
-  { label: "Education", href: "/education" },
-  { label: "Express", href: "/express" },
-  { label: "Events", href: "/events" },
+  { label: "Servicios", href: "/#servicios" },
   { label: "Nosotros", href: "/nosotros" },
+  { label: "Ecosistema", href: "/#ecosistema" },
+  { label: "Contacto", href: "/#contacto-home" },
 ];
 
 export const specialties = [
@@ -179,6 +179,7 @@ export type StoreProduct = {
   image: string;
   images?: readonly string[];
   stock?: number | null;
+  featured?: boolean;
   delivery: string;
   description: string;
   specs: readonly string[];

@@ -4,7 +4,7 @@ import { getPublicProducts } from "@/lib/public-data";
 import { getStudioProjects } from "@/lib/studio-projects";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticRoutes = ["", "/proyectos", "/servicios", "/servicios/tecnologia", "/servicios/produccion-audiovisual", "/servicios/infraestructura-eventos", "/education", "/express", "/events", "/tienda", "/nosotros", "/clientes", "/referidos", "/promos", "/contacto", "/medios-de-pago", "/terminos", "/privacidad", "/libro-de-reclamaciones"];
+  const staticRoutes = ["", "/proyectos", "/servicios/produccion-audiovisual", "/education", "/events", "/tienda", "/nosotros", "/clientes", "/referidos", "/promos", "/contacto", "/cotizar", "/medios-de-pago", "/terminos", "/privacidad", "/libro-de-reclamaciones"];
   const now = new Date();
   const [products, studioProjects] = await Promise.all([getPublicProducts(), getStudioProjects()]);
   return [

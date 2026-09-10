@@ -1,24 +1,28 @@
 "use client";
 
 import useEmblaCarousel from "embla-carousel-react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
   ArrowUpRight,
-  Clapperboard,
-  CloudCog,
-  CodeXml,
-  Gauge,
+  CalendarDays,
+  ChartNoAxesCombined,
+  Database,
+  Files,
   Globe2,
-  Hand,
-  Headphones,
-  Infinity as InfinityIcon,
   Mail,
-  Palette,
+  MapPinned,
+  MousePointerClick,
+  Network,
+  PanelsTopLeft,
+  ReceiptText,
   ShoppingBag,
   SlidersHorizontal,
+  Smartphone,
   Sparkles,
+  UserRoundCog,
+  Workflow,
   type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
@@ -29,20 +33,58 @@ import { useHydratedReducedMotion } from "@/lib/use-hydrated-reduced-motion";
 import { CarouselFrame, FullBleedSection, ViewportFrame } from "./HomeLayout";
 import styles from "./services-carousel.module.css";
 
+const SERVICE_COUNT = serviceShowcaseItems.length;
+const INITIAL_SERVICE = 3;
+
 const serviceIcons: Record<string, LucideIcon> = {
   "webs-corporativas": Globe2,
-  "tiendas-catalogos": ShoppingBag,
-  "plataformas-sistemas": CodeXml,
+  "landing-pages": MousePointerClick,
+  "tiendas-catalogos-digitales": ShoppingBag,
+  "apps-moviles": Smartphone,
+  "sistemas-plataformas-medida": PanelsTopLeft,
+  "crm-erp-saas": Database,
+  "facturacion-electronica-pos": ReceiptText,
   "cotizadores-configuradores": SlidersHorizontal,
-  "automatizacion-apis": CloudCog,
-  "identidad-diseno": Palette,
-  "produccion-audiovisual": Clapperboard,
-  "infraestructura-digital": Gauge,
+  "reservas-citas-turnos": CalendarDays,
+  "tracking-logistica": MapPinned,
+  "automatizacion-procesos": Workflow,
+  "apis-sistemas-conectados": Network,
+  "dashboards-bi-analitica": ChartNoAxesCombined,
+  "inteligencia-artificial": Sparkles,
+  "portales-clientes-autoservicio": UserRoundCog,
+  "gestion-documental-firmas": Files,
   "correos-corporativos": Mail,
-  "soporte-evolucion": Headphones,
 };
 
-function ServiceCard({ item, active, onActivate }: { item: ServiceShowcaseItem; active: boolean; onActivate: () => void }) {
+const headerVariants: Variants = {
+  hidden: {},
+  visible: { transition: { delayChildren: 0.08, staggerChildren: 0.13 } },
+};
+
+const revealVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] } },
+};
+
+const carouselVariants: Variants = {
+  hidden: {},
+  visible: { transition: { delayChildren: 0.34, staggerChildren: 0.065 } },
+};
+
+const cardEntryVariants: Variants = {
+  hidden: { opacity: 0, y: 60, scale: 0.96 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] } },
+};
+
+function ServiceCard({
+  item,
+  active,
+  onFocus,
+}: {
+  item: ServiceShowcaseItem;
+  active: boolean;
+  onFocus: () => void;
+}) {
   const Icon = serviceIcons[item.slug] ?? Sparkles;
   const cardStyle = {
     "--service-color": item.color,
@@ -50,31 +92,40 @@ function ServiceCard({ item, active, onActivate }: { item: ServiceShowcaseItem; 
   } as CSSProperties;
 
   return (
-    <article className={styles.slide} data-active={active} data-service={item.slug} style={cardStyle}>
-      <Link
-        aria-label={`Explorar servicio: ${item.shortName}`}
-        className={styles.card}
-        href={`/servicios/${item.slug}`}
-        onFocus={onActivate}
-        onMouseEnter={onActivate}
-      >
-        <div className={styles.cardHeader}>
-          <span>{item.number}</span>
-          <Icon aria-hidden="true" strokeWidth={1.65} />
-        </div>
-        <h3>{item.name}</h3>
-        <div className={styles.visual} data-service={item.slug}>
-          <Image
-            alt={item.imageAlt}
-            fill
-            loading={item.number === "01" || item.number === "02" ? "eager" : "lazy"}
-            sizes="(max-width: 640px) 82vw, (max-width: 1024px) 34vw, 330px"
-            src={item.image}
-          />
-          <span className={styles.visualGlow} aria-hidden="true" />
-        </div>
-        <span className={styles.cardCta}>Explorar servicio <ArrowUpRight aria-hidden="true" /></span>
-      </Link>
+    <article
+      aria-label={`${item.number} de ${SERVICE_COUNT}: ${item.shortName}`}
+      className={styles.slide}
+      data-active={active}
+      data-service={item.slug}
+      role="group"
+      style={cardStyle}
+    >
+      <motion.div className={styles.cardEntry} variants={cardEntryVariants}>
+        <Link
+          aria-label={`Cotizar solución: ${item.shortName}`}
+          className={styles.card}
+          href={`/cotizar?service=${item.slug}`}
+          onFocus={onFocus}
+        >
+          <div className={styles.cardHeader}>
+            <span>{item.number}</span>
+            <i aria-hidden="true"><Icon strokeWidth={1.65} /></i>
+          </div>
+          <h3>{item.name}</h3>
+          <p className={styles.description}>{item.description}</p>
+          <div className={styles.visual} data-service={item.slug}>
+            <Image
+              alt={item.imageAlt}
+              fill
+              loading={item.number === "03" || item.number === "04" || item.number === "05" ? "eager" : "lazy"}
+              sizes="(max-width: 640px) 82vw, (max-width: 1100px) 32vw, 290px"
+              src={item.image}
+            />
+            <span className={styles.visualGlow} aria-hidden="true" />
+          </div>
+          <span className={styles.cardCta}>Cotizar solución <ArrowUpRight aria-hidden="true" /></span>
+        </Link>
+      </motion.div>
     </article>
   );
 }
@@ -84,13 +135,18 @@ export function ServicesCarousel() {
   const [viewportRef, emblaApi] = useEmblaCarousel({
     align: "center",
     containScroll: false,
+    duration: 36,
     loop: true,
     skipSnaps: false,
     watchDrag: true,
   });
-  const [activeIndex, setActiveIndex] = useState(3);
-  const [paused, setPaused] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(INITIAL_SERVICE);
+  const [sectionInView, setSectionInView] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [focusWithin, setFocusWithin] = useState(false);
+  const [interactionPaused, setInteractionPaused] = useState(false);
   const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
   const active = serviceShowcaseItems[activeIndex] ?? serviceShowcaseItems[0];
 
   const syncSelection = useCallback(() => {
@@ -99,17 +155,29 @@ export function ServicesCarousel() {
   }, [emblaApi]);
 
   const registerInteraction = useCallback(() => {
-    setPaused(true);
+    setInteractionPaused(true);
     if (resumeTimer.current) clearTimeout(resumeTimer.current);
-    resumeTimer.current = setTimeout(() => setPaused(false), 5000);
+    resumeTimer.current = setTimeout(() => setInteractionPaused(false), 5600);
+  }, []);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setSectionInView(entry.isIntersecting && entry.intersectionRatio >= 0.3),
+      { threshold: [0, 0.3, 0.55] },
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
     if (!emblaApi) return;
     emblaApi.on("select", syncSelection);
     emblaApi.on("reInit", syncSelection);
-    emblaApi.scrollTo(3, true);
+    emblaApi.scrollTo(INITIAL_SERVICE, true);
     syncSelection();
+
     return () => {
       emblaApi.off("select", syncSelection);
       emblaApi.off("reInit", syncSelection);
@@ -117,10 +185,10 @@ export function ServicesCarousel() {
   }, [emblaApi, syncSelection]);
 
   useEffect(() => {
-    if (!emblaApi || paused || reducedMotion) return;
-    const timer = window.setInterval(() => emblaApi.scrollNext(), 6200);
+    if (!emblaApi || !sectionInView || hovered || focusWithin || interactionPaused || reducedMotion) return;
+    const timer = window.setInterval(() => emblaApi.scrollNext(), 5200);
     return () => window.clearInterval(timer);
-  }, [emblaApi, paused, reducedMotion]);
+  }, [emblaApi, focusWithin, hovered, interactionPaused, reducedMotion, sectionInView]);
 
   useEffect(() => () => {
     if (resumeTimer.current) clearTimeout(resumeTimer.current);
@@ -130,6 +198,7 @@ export function ServicesCarousel() {
     registerInteraction();
     emblaApi?.scrollPrev();
   };
+
   const goNext = () => {
     registerInteraction();
     emblaApi?.scrollNext();
@@ -140,78 +209,94 @@ export function ServicesCarousel() {
       aria-labelledby="capabilities-title"
       className={styles.section}
       id="servicios"
+      ref={sectionRef}
       spacing="scene"
       style={{ "--active-rgb": active.rgb } as CSSProperties}
     >
+      <div className={styles.ambient} aria-hidden="true">
+        <i /><i /><i /><i />
+      </div>
       <div className={styles.halo} aria-hidden="true" />
-      <ViewportFrame>
+
+      <ViewportFrame size="wide">
         <motion.header
           className={styles.header}
-          initial={false}
-          transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
-          viewport={{ amount: 0.45, once: true }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={reducedMotion ? false : "hidden"}
+          variants={headerVariants}
+          viewport={{ amount: 0.35, once: true }}
+          whileInView="visible"
         >
-          <span className={styles.eyebrow}><i />04 · SERVICIOS</span>
-          <h2 id="capabilities-title">TODO LO QUE<br />PODEMOS <em>CONSTRUIR.</em></h2>
-          <p>Soluciones digitales a medida que combinan estrategia, diseño y tecnología para <strong>impulsar negocios reales.</strong></p>
+          <motion.span className={styles.eyebrow} variants={revealVariants}><i />04 · SERVICIOS</motion.span>
+          <div className={styles.titleMask}>
+            <motion.h2 id="capabilities-title" variants={revealVariants}>
+              TODO LO QUE<br />PODEMOS <em>CONSTRUIR.</em>
+            </motion.h2>
+          </div>
+          <motion.p variants={revealVariants}>
+            Soluciones digitales a medida que combinan estrategia, diseño y tecnología<br className={styles.desktopBreak} /> para <strong>impulsar negocios reales.</strong>
+          </motion.p>
         </motion.header>
       </ViewportFrame>
 
       <CarouselFrame edge="wide">
         <motion.div
           className={styles.carouselStage}
-          initial={false}
-          transition={{ delay: 0.08, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          viewport={{ amount: 0.18, once: true }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={reducedMotion ? false : "hidden"}
+          variants={carouselVariants}
+          viewport={{ amount: 0.12, once: true }}
+          whileInView="visible"
         >
-          <button className={`${styles.arrow} ${styles.previous}`} onClick={goPrevious} type="button" aria-label="Ver servicio anterior"><ArrowLeft aria-hidden="true" /></button>
           <div
-            aria-label="Servicios de Wilo Studio"
+            aria-label="Catálogo de servicios digitales de Wilo Studio"
             aria-roledescription="carrusel"
             className={styles.viewport}
             onBlur={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false);
+              if (!event.currentTarget.contains(event.relatedTarget)) setFocusWithin(false);
             }}
-            onFocus={() => setPaused(true)}
+            onFocus={() => setFocusWithin(true)}
             onKeyDown={(event) => {
               if (event.key === "ArrowLeft") { event.preventDefault(); goPrevious(); }
               if (event.key === "ArrowRight") { event.preventDefault(); goNext(); }
             }}
-            onMouseEnter={() => setPaused(true)}
-            onMouseLeave={() => setPaused(false)}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            onPointerCancel={registerInteraction}
             onPointerDown={registerInteraction}
+            onPointerUp={registerInteraction}
             ref={viewportRef}
             role="region"
             tabIndex={0}
           >
-            <div className={styles.container}>
+            <motion.div className={styles.container} variants={carouselVariants}>
               {serviceShowcaseItems.map((item, index) => (
                 <ServiceCard
                   active={index === activeIndex}
                   item={item}
                   key={item.slug}
-                  onActivate={() => {
-                    setPaused(true);
+                  onFocus={() => {
+                    registerInteraction();
                     emblaApi?.scrollTo(index);
                   }}
                 />
               ))}
-            </div>
+            </motion.div>
           </div>
-          <button className={`${styles.arrow} ${styles.next}`} onClick={goNext} type="button" aria-label="Ver siguiente servicio"><ArrowRight aria-hidden="true" /></button>
         </motion.div>
       </CarouselFrame>
 
       <ViewportFrame>
-        <div className={styles.carouselMeta}>
-          <span><Hand aria-hidden="true" /> ARRASTRA PARA EXPLORAR</span>
-          <div><i /><strong>{String(activeIndex + 1).padStart(2, "0")}</strong><b>—</b><strong>10</strong><i /></div>
-          <span>DESPLAZAMIENTO INFINITO <InfinityIcon aria-hidden="true" /></span>
-        </div>
+        <motion.nav
+          aria-label="Navegación del catálogo de servicios"
+          className={styles.carouselMeta}
+          initial={false}
+        >
+          <button onClick={goPrevious} type="button" aria-label="Ver servicio anterior"><ArrowLeft aria-hidden="true" /></button>
+          <span className={styles.progress} aria-hidden="true"><i style={{ transform: `scaleX(${(activeIndex + 1) / SERVICE_COUNT})` }} /></span>
+          <span className={styles.count}><strong>{String(activeIndex + 1).padStart(2, "0")}</strong><b>/</b><strong>{SERVICE_COUNT}</strong></span>
+          <button onClick={goNext} type="button" aria-label="Ver siguiente servicio"><ArrowRight aria-hidden="true" /></button>
+        </motion.nav>
 
-        <p className={styles.srStatus} aria-live="polite">Servicio {activeIndex + 1} de 10: {active.shortName}</p>
+        <p className={styles.srStatus} aria-live="polite">Servicio {activeIndex + 1} de {SERVICE_COUNT}: {active.shortName}</p>
       </ViewportFrame>
     </FullBleedSection>
   );

@@ -10,10 +10,7 @@ import {
 import {
   ArrowLeft,
   ArrowRight,
-  Braces,
-  Layers3,
   MousePointer2,
-  Workflow,
 } from "lucide-react";
 import {
   useCallback,
@@ -27,6 +24,12 @@ import {
 } from "react";
 import { useHydratedReducedMotion } from "@/lib/use-hydrated-reduced-motion";
 import styles from "./lab-explorer.module.css";
+
+declare global {
+  interface Window {
+    __wiloLabActivationPlayed?: boolean;
+  }
+}
 
 type LabModule = {
   key: string;
@@ -148,9 +151,9 @@ function panelPose(offset: number) {
   const side = Math.sign(offset);
   const forwardPositions = [0, 52, 84, 110, 128];
   const backwardPositions = [0, 40, 57, 92, 112];
-  const scales = [1, .84, .68, .54, .46];
-  const depths = [0, -180, -320, -420, -500];
-  const opacity = [1, .9, .55, 0, 0];
+  const scales = [1, .88, .7, .56, .46];
+  const depths = [110, -45, -260, -410, -500];
+  const opacity = [1, .96, .52, 0, 0];
   const rotateY = distance === 0 ? -1 : side * samplePose([0, -7, -10, -11, -12], distance);
   const rotateZ = distance === 0 ? -.35 : side * samplePose([0, 1.15, 2, 2.4, 2.7], distance);
 
@@ -187,6 +190,7 @@ function visualOffset(card: LabCard, active: LabCard) {
 export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const activationTimerRef = useRef<number | null>(null);
   const dragGestureRef = useRef<{ lastAt: number; lastX: number; startX: number; velocity: number; card: string | null } | null>(null);
   const wheelLockRef = useRef(false);
   const resumeTimeoutRef = useRef<number | null>(null);
@@ -194,12 +198,11 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
   const [dragProgress, setDragProgress] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [inView, setInView] = useState(false);
+  const [activationPhase, setActivationPhase] = useState<"waiting" | "playing" | "revealed">("waiting");
   const [paused, setPaused] = useState(false);
   const hoverRef = useRef(false);
   const focusRef = useRef(false);
   const suppressClickRef = useRef(false);
-  const [showAllModules, setShowAllModules] = useState(false);
-  const [desktopAutoplay, setDesktopAutoplay] = useState(false);
   const reducedMotion = useHydratedReducedMotion();
   const rawTiltX = useMotionValue(0);
   const rawTiltY = useMotionValue(0);
@@ -249,32 +252,85 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setInView(Boolean(entry?.isIntersecting && entry.intersectionRatio > .55)),
-      { threshold: [0, .55, .85] },
-    );
+    let frame = 0;
+    const syncVisibility = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const fullPageSection = root.closest<HTMLElement>("[data-fullpage-section]");
+        if (document.documentElement.classList.contains("wilo-fullpage")) {
+          setInView(fullPageSection?.dataset.fullpageActive === "true");
+          return;
+        }
+        const rect = root.getBoundingClientRect();
+        const bandTop = window.innerHeight * .14;
+        const bandBottom = window.innerHeight * .86;
+        setInView(rect.top < bandBottom && rect.bottom > bandTop);
+      });
+    };
+    const observer = new IntersectionObserver(syncVisibility, { threshold: [0, .01, .5] });
+    const handleFullPageChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ id?: string }>).detail;
+      if (document.documentElement.classList.contains("wilo-fullpage")) setInView(detail?.id === "lab");
+    };
     observer.observe(root);
-    return () => observer.disconnect();
+    window.addEventListener("scroll", syncVisibility, { passive: true });
+    window.addEventListener("resize", syncVisibility);
+    window.addEventListener("wilo:fullpagechange", handleFullPageChange);
+    document.addEventListener("transitionend", syncVisibility);
+    syncVisibility();
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("scroll", syncVisibility);
+      window.removeEventListener("resize", syncVisibility);
+      window.removeEventListener("wilo:fullpagechange", handleFullPageChange);
+      document.removeEventListener("transitionend", syncVisibility);
+    };
   }, []);
 
   useEffect(() => {
-    const media = window.matchMedia("(min-width: 801px) and (pointer: fine)");
-    const sync = () => setDesktopAutoplay(media.matches);
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
+    if (!inView || activationPhase !== "waiting") return;
+    if (reducedMotion) {
+      window.__wiloLabActivationPlayed = true;
+      setActivationPhase("revealed");
+      return;
+    }
+    if (window.__wiloLabActivationPlayed) {
+      setActivationPhase("revealed");
+      return;
+    }
+    window.__wiloLabActivationPlayed = true;
+    setActivationPhase("playing");
+    activationTimerRef.current = window.setTimeout(
+      () => setActivationPhase("revealed"),
+      1380,
+    );
+  }, [activationPhase, inView, reducedMotion]);
+
+  useEffect(() => () => {
+    if (activationTimerRef.current) window.clearTimeout(activationTimerRef.current);
   }, []);
 
+  const labRevealed = reducedMotion || activationPhase === "revealed";
+  const labVisible = reducedMotion || (inView && labRevealed);
+
   useEffect(() => {
-    if (!desktopAutoplay || !inView || paused || reducedMotion || cards.length < 2) return;
+    if (!inView || !labRevealed || paused || reducedMotion || cards.length < 2) return;
     const timer = window.setInterval(() => move(1), 6000);
     return () => window.clearInterval(timer);
-  }, [cards.length, desktopAutoplay, inView, move, paused, reducedMotion]);
+  }, [cards.length, inView, labRevealed, move, paused, reducedMotion]);
 
   if (!cards.length) return null;
   const active = cards[activeIndex] ?? cards[0];
   const activeVisualIndex = VISUAL_ORDER.indexOf(active.key as typeof VISUAL_ORDER[number]);
   const chameleonPose = CHAMELEON_POSE[active.key] ?? { rotate: 0, x: 0, y: 0 };
+  const activeAnnotation = active.key === "crm"
+    ? { className: styles.relationsNote, copy: <>Conecta<br />relaciones</> }
+    : active.key === "tracking"
+      ? { className: styles.progressNote, copy: <>Sigue<br />el progreso</> }
+      : active.key === "api"
+        ? { className: styles.connectNote, copy: <>Conecta<br />tu mundo</> }
+        : { className: styles.adaptNote, copy: <>Ideas que se<br />adaptan a ti.</> };
   const dragTargetKey = VISUAL_ORDER[(activeVisualIndex + (dragProgress < 0 ? 1 : -1) + VISUAL_ORDER.length) % VISUAL_ORDER.length];
   const dragTargetIndex = cards.findIndex((card) => card.key === dragTargetKey);
   const dragTarget = cards[dragTargetIndex] ?? active;
@@ -329,6 +385,7 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
 
   const startDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0 || (event.target as HTMLElement).closest("a, button:not([data-stage-target])")) return;
+    event.preventDefault();
     suppressClickRef.current = false;
     event.currentTarget.setPointerCapture(event.pointerId);
     dragGestureRef.current = {
@@ -358,6 +415,7 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
   return (
     <div
       className={styles.explorer}
+      data-lab-visible={labVisible ? "true" : "false"}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) { focusRef.current = false; resumeInteraction(); }
       }}
@@ -370,11 +428,53 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
       }}
       ref={rootRef}
     >
+      {activationPhase === "playing" ? (
+        <div
+          aria-label="Activando Wilo Lab"
+          className={styles.labActivation}
+          data-reduced-motion={reducedMotion ? "true" : "false"}
+          data-testid="lab-activation"
+          role="status"
+        >
+          <span className={`${styles.activationPanel} ${styles.activationPanelLeft}`} aria-hidden="true" />
+          <span
+            className={`${styles.activationPanel} ${styles.activationPanelRight}`}
+            aria-hidden="true"
+            onAnimationEnd={() => setActivationPhase("revealed")}
+          />
+          <div className={styles.activationCore}>
+            <span className={styles.activationMark} aria-hidden="true">W</span>
+            <svg aria-hidden="true" className={styles.activationFlask} viewBox="0 0 180 220">
+              <defs>
+                <clipPath id="lab-flask-liquid">
+                  <path d="M65 18h50v48l42 91c10 22-5 43-29 43H52c-24 0-39-21-29-43l42-91z" />
+                </clipPath>
+                <linearGradient id="lab-liquid-gradient" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stopColor="#8bea75" />
+                  <stop offset=".48" stopColor="#2ee6b0" />
+                  <stop offset="1" stopColor="#27d7f5" />
+                </linearGradient>
+              </defs>
+              <g clipPath="url(#lab-flask-liquid)">
+                <rect className={styles.activationLiquid} fill="url(#lab-liquid-gradient)" height="126" width="180" x="0" y="95" />
+                <path className={styles.activationWave} d="M-12 105c24-14 45 13 70 0s48-13 73 0 44 5 64-3v118H-12z" fill="rgba(220,255,244,.42)" />
+                <circle className={styles.activationBubbleOne} cx="70" cy="128" fill="#d8fff2" r="5" />
+                <circle className={styles.activationBubbleTwo} cx="110" cy="151" fill="#9effdc" r="7" />
+                <circle className={styles.activationBubbleThree} cx="91" cy="174" fill="#ecfff8" r="3.5" />
+              </g>
+              <path className={styles.activationFlaskOutline} d="M65 18h50M74 18v50l-49 91c-10 20 4 41 27 41h76c23 0 37-21 27-41l-49-91V18" fill="none" />
+              <path className={styles.activationFlaskRim} d="M61 18c0-6 5-10 11-10h36c6 0 11 4 11 10s-5 10-11 10H72c-6 0-11-4-11-10z" fill="rgba(255,255,255,.08)" />
+            </svg>
+            <div className={styles.activationWordmark}><strong>WILO</strong><em>LAB</em></div>
+            <p>IDEAS <i /> SISTEMAS <i /> AUTOMATIZACIÓN</p>
+          </div>
+        </div>
+      ) : null}
+
       <div className={styles.ambient} aria-hidden="true"><i /><i /><i /><i /><i /></div>
 
       <div className={styles.sceneGrid} style={stageStyle}>
         <aside className={styles.intro}>
-          <span className={styles.eyebrow}><b>05</b><i /> WILO LAB</span>
           <h2 className={styles.labTitle}>WILO <em>LAB</em></h2>
           <p className={styles.headline}>LO QUE VES<br />ES SOLO LA <strong>SUPERFICIE.</strong></p>
           <div className={styles.manifesto}>
@@ -383,7 +483,7 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
           </div>
 
           <div aria-label="Módulos de Wilo Lab" className={styles.selector} role="group">
-            {cards.slice(0, showAllModules ? cards.length : 6).map((card, index) => (
+            {cards.map((card, index) => (
               <button
                 aria-controls="wilo-lab-stage"
                 aria-pressed={index === activeIndex}
@@ -407,11 +507,6 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
                 <i aria-hidden="true" />
               </button>
             ))}
-            {!showAllModules ? (
-              <button className={styles.moduleMore} onClick={() => setShowAllModules(true)} type="button">
-                <span>+</span><strong>2 más</strong><i aria-hidden="true" />
-              </button>
-            ) : null}
           </div>
         </aside>
 
@@ -449,10 +544,9 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
           style={stageStyle}
           tabIndex={0}
         >
-          <span className={`${styles.handNote} ${styles.relationsNote}`} aria-hidden="true">Conecta<br />relaciones</span>
-          <span className={`${styles.handNote} ${styles.adaptNote}`} aria-hidden="true">Construido para<br />adaptarse a ti.</span>
-          <span className={`${styles.handNote} ${styles.progressNote}`} aria-hidden="true">Sigue<br />el progreso</span>
-          <span className={`${styles.handNote} ${styles.connectNote}`} aria-hidden="true">Conecta<br />tu mundo</span>
+          <span className={`${styles.handNote} ${activeAnnotation.className}`} aria-hidden="true" key={active.key}>
+            {activeAnnotation.copy}
+          </span>
 
           <motion.div className={styles.tiltScene} style={{ rotateX: tiltX, rotateY: tiltY }}>
             <motion.div className={styles.panelPlane}>
@@ -460,6 +554,15 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
                 const offset = visualOffset(card, active);
                 const targetOffset = visualOffset(card, dragTarget);
                 const draggedPose = mixPanelPose(panelPose(offset), panelPose(targetOffset), Math.abs(dragProgress));
+                const presentationPose = labVisible ? draggedPose : {
+                  opacity: 0,
+                  rotateY: 0,
+                  rotateZ: 0,
+                  scale: .9,
+                  x: "0%",
+                  y: 38,
+                  z: -150,
+                };
                 const distance = Math.abs(offset);
                 const isActive = offset === 0;
                 const cardStyle = {
@@ -470,7 +573,7 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
 
                 return (
                   <motion.article
-                    animate={draggedPose}
+                    animate={presentationPose}
                     initial={false}
                     aria-hidden={distance > 2}
                     className={`${styles.panel} ${card.kind === "cta" ? styles.ctaPanel : ""}`}
@@ -486,7 +589,12 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
                   >
                     {card.kind !== "cta" ? (
                       <motion.div
-                        animate={{ opacity: isActive ? 1 : 0, x: reducedMotion ? 0 : chameleonPose.x * .35, rotate: reducedMotion ? 0 : chameleonPose.rotate * .35 }}
+                        animate={{
+                          opacity: isActive && labVisible ? 1 : 0,
+                          x: reducedMotion ? 0 : chameleonPose.x * .35,
+                          y: isActive && labVisible ? 0 : -20,
+                          rotate: reducedMotion ? 0 : chameleonPose.rotate * .35,
+                        }}
                         aria-hidden="true"
                         className={styles.chameleon}
                         transition={{ duration: reducedMotion ? 0 : .6 }}
@@ -498,6 +606,7 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
                       <Image
                         alt={`Interfaz de ${card.label}`}
                         className={styles.panelImage}
+                        draggable={false}
                         fill
                         priority={index === 0}
                         sizes="(max-width: 700px) 92vw, (max-width: 1200px) 66vw, 900px"
@@ -509,8 +618,8 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
                         <div className={styles.ctaCopy}>
                           <span>UNA IDEA DIFERENTE</span>
                           <h3>¿TU PROYECTO<br />NO ESTÁ ACÁ?</h3>
-                          <strong>HACEMOS REAL<br />LO QUE SE CREE IMPOSIBLE.</strong>
-                          <p>{card.description}</p>
+                          <strong>NOSOTROS CONSTRUIMOS<br />LO QUE OTROS CREEN IMPOSIBLE.</strong>
+                          <p>Si tu operación necesita algo diferente, podemos estudiar cómo construirlo.</p>
                           {isActive ? <Link href="/contacto">CUÉNTANOS TU IDEA <ArrowRight aria-hidden="true" /></Link> : null}
                         </div>
                       ) : (
@@ -532,7 +641,12 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
                     </div>
                     {card.kind !== "cta" ? (
                       <motion.div
-                        animate={{ opacity: isActive ? 1 : 0, x: reducedMotion ? 0 : chameleonPose.x * .35, rotate: reducedMotion ? 0 : chameleonPose.rotate * .35 }}
+                        animate={{
+                          opacity: isActive && labVisible ? 1 : 0,
+                          x: reducedMotion ? 0 : chameleonPose.x * .35,
+                          y: isActive && labVisible ? 0 : -20,
+                          rotate: reducedMotion ? 0 : chameleonPose.rotate * .35,
+                        }}
                         aria-hidden="true"
                         className={`${styles.chameleon} ${styles.chameleonFront}`}
                         transition={{ duration: reducedMotion ? 0 : .6 }}
@@ -576,11 +690,6 @@ export function LabExplorer({ modules }: { modules: readonly LabModule[] }) {
         </div>
       </div>
 
-      <div className={styles.featureRail} aria-label="Principios de Wilo Lab">
-        <div><span><Layers3 aria-hidden="true" /></span><p><strong>Interfaces reales</strong><small>Herramientas que tu equipo puede usar.</small></p></div>
-        <div><span><Workflow aria-hidden="true" /></span><p><strong>Flujos inteligentes</strong><small>Procesos conectados con menos fricción.</small></p></div>
-        <div><span><Braces aria-hidden="true" /></span><p><strong>Soluciones a medida</strong><small>Lo que tu negocio necesita, sin ruido.</small></p></div>
-      </div>
     </div>
   );
 }

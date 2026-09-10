@@ -11,9 +11,9 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 1366, height: 768
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.addInitScript(() => sessionStorage.setItem("wilo-loader-seen", "skip"));
-  await page.goto("http://localhost:3000/#audiovisual", { waitUntil: "domcontentloaded", timeout: 60000 });
-  await page.waitForSelector("#audiovisual");
-  for (const id of ["audiovisual", "proceso", "tecnologia", "store"]) {
+  await page.goto("http://localhost:3000/#proceso", { waitUntil: "domcontentloaded", timeout: 60000 });
+  await page.waitForSelector("#proceso");
+  for (const id of ["proceso", "tecnologia", "store"]) {
     await page.evaluate((id) => { window.location.hash = id; }, id);
     if (viewport.width >= 1024) {
       await page.waitForFunction((id) => document.getElementById(id)?.dataset.fullpageActive === "true", id, { timeout: 15000 });
