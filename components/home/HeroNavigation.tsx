@@ -2,22 +2,34 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import styles from "./hero-wilo.module.css";
 import { LanguageSwitcher } from "../language-switcher";
 import { useI18n } from "../i18n-provider";
+import { publicHref } from "@/lib/public-release";
 
 const heroLinks = [
   { label: "nav.work", href: "/#trabajos" },
-  { label: "nav.projects", href: "/proyectos" },
+  { label: "nav.projects", href: publicHref("projects", "/proyectos") },
   { label: "nav.services", href: "/#servicios" },
-  { label: "nav.about", href: "/#sobre-wilo" },
+  { label: "nav.about", href: publicHref("about", "/nosotros") },
   { label: "nav.ecosystem", href: "/#ecosistema" },
-  { label: "nav.contact", href: "/contacto" },
+  { label: "nav.contact", href: "/#contacto-home" },
 ] as const;
 
-export function HeroNavigation() {
+const showcaseLinks = [
+  { label: "nav.home", href: "/" },
+  { label: "nav.work", href: "/#trabajos" },
+  { label: "nav.services", href: "/#servicios" },
+  { label: "nav.about", href: publicHref("about", "/nosotros") },
+  { label: "nav.contact", href: "/#contacto-home" },
+] as const;
+
+export function HeroNavigation({ subpage = false }: { subpage?: boolean }) {
   const { t } = useI18n();
+  const pathname = usePathname();
+  const navigationLinks = pathname === "/sitios-reales" ? showcaseLinks : heroLinks;
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("inicio");
@@ -99,12 +111,21 @@ export function HeroNavigation() {
     </Link>
   );
 
-  const labTheme = activeSection === "lab";
-  const lightScene = scrolled && ["sobre-wilo", "servicios", "audiovisual", "confianza", "tecnologia", "store", "ecosistema", "nosotros", "internacional", "pie-de-pagina"].includes(activeSection);
+  const labTheme = !subpage && activeSection === "lab";
+  const lightScene = subpage || (scrolled && ["sobre-wilo", "servicios", "audiovisual", "confianza", "tecnologia", "store", "ecosistema", "nosotros", "internacional", "pie-de-pagina"].includes(activeSection));
+  const routeIsActive = (href: string) => {
+    if (!subpage) return false;
+    if (href === "/proyectos") return pathname.startsWith("/proyectos") || pathname.startsWith("/portafolio");
+    if (href === "/nosotros") return pathname.startsWith("/nosotros");
+    if (href === "/contacto") return pathname.startsWith("/contacto") || pathname.startsWith("/cotizar");
+    if (href === "/#servicios") return pathname.startsWith("/servicios");
+    if (href === "/#ecosistema") return ["/education", "/events", "/express", "/tienda"].some((route) => pathname.startsWith(route));
+    return false;
+  };
 
   return (
     <header
-      className={`${styles.navigation} ${scrolled ? styles.navigationScrolled : ""} ${labTheme ? styles.navigationLab : ""}`}
+      className={`${styles.navigation} ${scrolled ? styles.navigationScrolled : ""} ${labTheme ? styles.navigationLab : ""} ${subpage ? styles.navigationSubpage : ""}`}
       data-home-navigation
       data-i18n-manual
       data-theme={labTheme ? "lab" : "default"}
@@ -113,15 +134,15 @@ export function HeroNavigation() {
       <div className={styles.navigationInner}>
         {logo}
         <nav className={styles.desktopNavigation} aria-label={t("a11y.homeNavigation")}>
-          {heroLinks.map((item) => {
+          {navigationLinks.map((item) => {
             const id = item.href.startsWith("/#") ? item.href.slice(2) : "";
-            const isActive = Boolean(id && id === activeSection);
-            return <Link aria-current={isActive ? "location" : undefined} data-active={isActive} href={item.href} key={item.href}>{t(item.label)}</Link>;
+            const isActive = routeIsActive(item.href) || Boolean(!subpage && id && id === activeSection);
+            return <Link aria-current={isActive ? (subpage ? "page" : "location") : undefined} data-active={isActive} href={item.href} key={item.label}>{t(item.label)}</Link>;
           })}
         </nav>
         <div className={styles.navigationActions}>
           <LanguageSwitcher compact />
-          <Link className={styles.navigationCta} href="/contacto#cotizador">
+          <Link className={styles.navigationCta} href={publicHref("quote", "/cotizar")}>
             {t("nav.startProject")} <span aria-hidden="true">↗</span>
           </Link>
           <button
@@ -159,13 +180,13 @@ export function HeroNavigation() {
           ><span aria-hidden="true">×</span></button>
         </div>
         <nav aria-label={t("a11y.mobileNavigation")}>
-          {heroLinks.map((item, index) => (
-            <Link aria-current={item.href === `/#${activeSection}` ? "location" : undefined} data-active={item.href === `/#${activeSection}`} href={item.href} key={item.href} onClick={() => setMenuOpen(false)}>
+          {navigationLinks.map((item, index) => (
+            <Link aria-current={routeIsActive(item.href) || item.href === `/#${activeSection}` ? (subpage ? "page" : "location") : undefined} data-active={routeIsActive(item.href) || item.href === `/#${activeSection}`} href={item.href} key={item.label} onClick={() => setMenuOpen(false)}>
               <span>0{index + 1}</span>{t(item.label)}
             </Link>
           ))}
         </nav>
-        <Link className={styles.mobileNavigationCta} href="/contacto#cotizador" onClick={() => setMenuOpen(false)}>
+        <Link className={styles.mobileNavigationCta} href={publicHref("quote", "/cotizar")} onClick={() => setMenuOpen(false)}>
           {t("nav.startProject")} <span aria-hidden="true">↗</span>
         </Link>
       </div>

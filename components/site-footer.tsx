@@ -1,57 +1,186 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowUp, ArrowUpRight, Globe2, Grid2X2, House, Mail, MapPin, MessageCircle, ShieldCheck } from "lucide-react";
-import { Fragment } from "react";
-import { Brand } from "./brand";
+import {
+  ArrowUp,
+  ArrowUpRight,
+  Instagram,
+  Linkedin,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Youtube,
+} from "lucide-react";
 import { useSiteSettings } from "./site-settings-provider";
-import { useI18n } from "./i18n-provider";
+import { publicHref } from "@/lib/public-release";
+import { siteConfig } from "@/lib/content";
 import styles from "./site-footer.module.css";
 
-function withBreaks(value: string) {
-  return value.split("\n").map((line, index) => <Fragment key={`${line}-${index}`}>{index > 0 ? <br /> : null}{line}</Fragment>);
+type FooterLink = readonly [label: string, href: string];
+
+const studioLinks: FooterLink[] = [
+  ["Nosotros", publicHref("about", "/nosotros")],
+  ["Servicios", "/#servicios"],
+  ["Proyectos", publicHref("projects", "/proyectos")],
+  ["Trabajos", "/#trabajos"],
+  ["Contacto", "/#contacto-home"],
+];
+
+const ecosystemLinks: FooterLink[] = [
+  ["Wilo Express", publicHref("express", process.env.NEXT_PUBLIC_WILO_EXPRESS_URL || "https://wilo.site")],
+  ["Wilo Education", publicHref("education", "/education")],
+  ["Wilo Events", publicHref("events", "/events")],
+  ["Wilo Store", publicHref("store", "/tienda")],
+  ["Todo el ecosistema", "/#ecosistema"],
+];
+
+const legalLinks: FooterLink[] = [
+  ["Política de privacidad", "/privacidad"],
+  ["Términos y condiciones", "/terminos"],
+  ["Política de cookies", "/privacidad#cookies"],
+  ["Medios de pago", "/medios-de-pago"],
+];
+
+function FooterNavLinks({ links }: { links: FooterLink[] }) {
+  return (
+    <div className={styles.links}>
+      {links.map(([label, href]) => {
+        const external = href.startsWith("http");
+        return external ? (
+          <a href={href} key={`${label}-${href}`} rel="noreferrer" target="_blank">
+            {label}<ArrowUpRight aria-hidden="true" />
+          </a>
+        ) : (
+          <Link href={href} key={`${label}-${href}`}>
+            {label}{label.startsWith("Wilo ") ? <ArrowUpRight aria-hidden="true" /> : null}
+          </Link>
+        );
+      })}
+    </div>
+  );
 }
 
 export function SiteFooter() {
   const settings = useSiteSettings();
-  const { t } = useI18n();
-  const confirmedCompanyRuc = settings.legalName.trim().toUpperCase() === "WILO INDUSTRIES GROUP E.I.R.L." && /^\d{11}$/.test(settings.ruc) ? settings.ruc : null;
-  const columns = [
-    { title: "ESTUDIO", subtitle: t("footer.studioSubtitle"), icon: House, links: [[t("nav.about"), "/nosotros"], [t("nav.services"), "/#servicios"], [t("nav.projects"), "/proyectos"], [t("nav.work"), "/#trabajos"], [t("nav.contact"), "/contacto"]] },
-    { title: t("nav.ecosystem").toLocaleUpperCase(), subtitle: t("footer.ecosystemSubtitle"), icon: Grid2X2, links: [["Wilo Express", process.env.NEXT_PUBLIC_WILO_EXPRESS_URL || "https://wilo.site"], ["Wilo Education", "/education"], ["Wilo Events", "/events"], ["Wilo Store", "/tienda"], [t("footer.allEcosystem"), "/#ecosistema"]] },
-    { title: t("footer.legal"), subtitle: t("footer.legalSubtitle"), icon: ShieldCheck, links: [[t("footer.privacy"), "/privacidad"], [t("footer.terms"), "/terminos"], [t("footer.cookies"), "/privacidad#cookies"], [t("footer.complaints"), "/libro-de-reclamaciones"], [t("footer.payments"), "/medios-de-pago"]] },
+  const ein = siteConfig.ein;
+  const footerEmail = "comercial@wilostudio.site";
+  const socialProfiles = [
+    { label: "Instagram", href: process.env.NEXT_PUBLIC_WILO_INSTAGRAM_URL, Icon: Instagram },
+    { label: "LinkedIn", href: process.env.NEXT_PUBLIC_WILO_LINKEDIN_URL, Icon: Linkedin },
+    { label: "YouTube", href: process.env.NEXT_PUBLIC_WILO_YOUTUBE_URL, Icon: Youtube },
   ];
+
   return (
-    <footer className={styles.footer} data-i18n-manual id="footer" aria-label={t("footer.aria")}>
-      <div className={styles.main}>
-        <div className={styles.identity}>
-          <Brand />
-          <p className={styles.promise}>{withBreaks(t("footer.promise"))}</p>
-          <span className={styles.yellowRule} />
-          <div className={styles.contacts}>
-            {settings.emailVerified ? <a href={`mailto:${settings.email}`}><Mail /><span><strong>{settings.email}</strong><small>{t("footer.projectTalk")}</small></span></a> : <Link href="/contacto"><Mail /><span><strong>{t("footer.projectTalk")}</strong><small>{t("footer.writeHere")}</small></span></Link>}
-            <a href={settings.whatsapp} target="_blank" rel="noreferrer"><MessageCircle /><span><strong>{settings.phoneDisplay}</strong><small>{t("footer.whatsappTalk")}</small></span></a>
-            <span><MapPin /><span><strong>{settings.location}</strong><small>{t("footer.fromSouth")}</small></span></span>
+    <footer className={styles.footer} id="footer" aria-label="Pie de página de Wilo Studio">
+      <div className={styles.footerMain}>
+        <section className={styles.brandBlock} aria-label="Wilo Studio">
+          <Link href="/" className={styles.logoLink} aria-label="Wilo Studio — Inicio">
+            <Image
+              className={styles.logo}
+              src="/images/logo-wilo-new.png"
+              alt="Wilo Studio"
+              width={190}
+              height={116}
+              sizes="190px"
+            />
+          </Link>
+          <p className={styles.brandPromise}>Ideas que <strong>conectan.</strong></p>
+          <small>Experiencias digitales excepcionales.</small>
+          <div className={styles.socials} aria-label="Redes sociales">
+            {socialProfiles.map(({ label, href, Icon }) => href ? (
+              <a href={href} key={label} aria-label={label} rel="noreferrer" target="_blank"><Icon aria-hidden="true" /></a>
+            ) : (
+              <span key={label} aria-label={`${label}, enlace pendiente de configurar`} role="img"><Icon aria-hidden="true" /></span>
+            ))}
           </div>
-          <p className={styles.handNote}>{withBreaks(t("footer.connectingIdeas"))}</p>
-        </div>
-        {columns.map(({ title, subtitle, icon: Icon, links }) => <nav className={styles.column} key={title} aria-label={title}><div className={styles.columnHeading}><Icon /><div><h2>{title}</h2><p>{subtitle}</p></div></div><div className={styles.links}>{links.map(([label, href]) => href.startsWith("http") ? <a key={href} href={href} target="_blank" rel="noreferrer">{label}<ArrowUpRight size={14} /></a> : <Link key={href} href={href}>{label}<ArrowUpRight size={14} /></Link>)}</div></nav>)}
-        <div className={styles.about}>
-          <h2>{t("footer.weAre")}</h2>
-          <p>{t("footer.about")}</p>
-          <span className={styles.yellowRule} />
-          <p className={styles.manifesto}>{withBreaks(t("footer.manifesto"))}</p>
-          <span className={styles.smallW} aria-hidden="true">w<span>.</span></span>
-          <p className={styles.keepCreating}>{t("footer.keepCreating")}</p>
-        </div>
+        </section>
+
+        <nav className={`${styles.footerGroup} ${styles.studio}`} aria-label="Estudio">
+          <h2>ESTUDIO</h2>
+          <i className={styles.headingRule} />
+          <FooterNavLinks links={studioLinks} />
+        </nav>
+
+        <nav className={`${styles.footerGroup} ${styles.ecosystem}`} aria-label="Ecosistema">
+          <h2>ECOSISTEMA</h2>
+          <i className={styles.headingRule} />
+          <FooterNavLinks links={ecosystemLinks} />
+        </nav>
+
+        <section className={`${styles.footerGroup} ${styles.legalBlock}`} aria-labelledby="footer-legal-title">
+          <h2 id="footer-legal-title">LEGAL</h2>
+          <i className={styles.headingRule} />
+          <div className={styles.legalContent}>
+            <div className={styles.entities}>
+              <article>
+                <strong>WILO INDUSTRIES GROUP E.I.R.L.</strong>
+              </article>
+              <article>
+                <strong>WILO GLOBAL INDUSTRIES LLC</strong>
+                {ein ? <span>EIN: {ein}</span> : process.env.NODE_ENV === "development" ? <span>EIN pendiente de confirmar</span> : null}
+              </article>
+            </div>
+            <Link className={styles.complaintsBook} href="/libro-de-reclamaciones">
+              <Image src="/images/wilo/legal/libro-reclamaciones.jpg" alt="Libro de Reclamaciones" width={137} height={93} sizes="137px" />
+              <span>LIBRO DE<br />RECLAMACIONES <ArrowUpRight aria-hidden="true" /></span>
+            </Link>
+          </div>
+          <FooterNavLinks links={legalLinks} />
+        </section>
+
+        <section className={`${styles.footerGroup} ${styles.footerContact}`} aria-labelledby="footer-contact-title">
+          <h2 id="footer-contact-title">HABLEMOS</h2>
+          <i className={styles.headingRule} />
+          <div className={styles.contactList}>
+            <a className={styles.contactItem} href={settings.whatsapp} rel="noreferrer" target="_blank">
+              <i className={styles.whatsappIcon}><MessageCircle aria-hidden="true" /></i>
+              <span><strong>{settings.phoneDisplay}</strong><small>Escríbenos por WhatsApp</small></span>
+            </a>
+            <a className={styles.contactItem} href={`mailto:${footerEmail}`}>
+              <i className={styles.mailIcon}><Mail aria-hidden="true" /></i>
+              <span><strong>{footerEmail}</strong><small>Envíanos un correo</small></span>
+            </a>
+            <div className={styles.contactItem}>
+              <i className={styles.locationIcon}><MapPin aria-hidden="true" /></i>
+              <span><strong>{settings.location}</strong><small>Desde aquí para el mundo</small></span>
+            </div>
+          </div>
+        </section>
+
+        <aside className={styles.mascotBlock} aria-label="Un mundo digital más increíble">
+          <p>Un mundo<br />digital más<br />increíble.</p>
+          <i className={styles.mascotRule} />
+          <div className={styles.mascotArt}>
+            <Image
+              src="/images/wilo/hero/chameleon-pc.webp"
+              alt="Camaleón de Wilo Studio mirando hacia nuevos proyectos"
+              width={230}
+              height={277}
+              sizes="230px"
+            />
+          </div>
+        </aside>
       </div>
-      <div className={styles.legal}>
-        <p><strong>© {new Date().getFullYear()} Wilo Studio.</strong><span>{t("footer.rights")}</span></p>
-        <p><strong>WILO INDUSTRIES GROUP E.I.R.L.</strong><span>{confirmedCompanyRuc ? `RUC ${confirmedCompanyRuc} · ` : ""}{t("footer.peruvianBilling")}</span></p>
-        <p><strong>WILO GLOBAL INDUSTRIES LLC</strong><span>{t("footer.globalBilling")}</span></p>
-        <Link href="/medios-de-pago" className={styles.billing}><Globe2 /><span>{t("footer.borderlessIdeas")}<small>{t("footer.sameCommitment")}</small></span><ArrowUpRight size={16} /></Link>
+
+      <div className={styles.footerBottom}>
+        <p>© {new Date().getFullYear()} Wilo Studio. Todos los derechos reservados.</p>
+        <div className={styles.worldLine} aria-label="Presencia de Wilo Studio">
+          <span><MapPin aria-hidden="true" />Arequipa, Perú</span>
+          <span>United States</span>
+          <span>El mundo</span>
+          <span>Ideas sin fronteras.</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => window.scrollTo({
+            top: 0,
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          })}
+        >
+          <ArrowUp aria-hidden="true" /> Volver arriba
+        </button>
       </div>
-      <div className={styles.bottom}><span>{t("footer.worldLine")}</span><button type="button" onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" })}>{t("footer.backTop")}<ArrowUp size={16} /></button></div>
     </footer>
   );
 }

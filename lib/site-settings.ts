@@ -65,7 +65,8 @@ export const getPublicSiteSettings = cache(async (): Promise<PublicSiteSettings>
       if (value === "false" || value === "0" || value === "no") return false;
       return fallback;
     };
-    const phone = read("contact.whatsapp", fallbackSettings.phone).replace(/\D/g, "") || fallbackSettings.phone;
+    // The commercial WhatsApp is intentionally canonical across every public route.
+    const phone = fallbackSettings.phone;
     const rawBanks = values.get("payments.bank_accounts")?.value;
     let parsedBanks: unknown = null;
     if (rawBanks) {
@@ -87,7 +88,7 @@ export const getPublicSiteSettings = cache(async (): Promise<PublicSiteSettings>
       url,
       invoiceNote: read("business.invoice_note", fallbackSettings.invoiceNote),
       paymentTerms: read("projects.payment_terms", fallbackSettings.paymentTerms),
-      yapePlin: read("payments.yape_plin", fallbackSettings.yapePlin),
+      yapePlin: fallbackSettings.yapePlin,
       paymentInstructions: read("payments.instructions", fallbackSettings.paymentInstructions),
       bankAccounts: validBankAccounts(parsedBanks) || fallbackSettings.bankAccounts,
     };

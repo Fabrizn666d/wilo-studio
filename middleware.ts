@@ -1,6 +1,23 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse, type NextRequest } from "next/server";
 import { isUserRole } from "@/lib/auth/permissions";
+import { PUBLIC_FEATURES } from "@/lib/public-release";
+
+const guardedRoutes = [
+  { prefixes: ["/proyectos", "/portafolio"], enabled: PUBLIC_FEATURES.projects },
+  { prefixes: ["/nosotros"], enabled: PUBLIC_FEATURES.about },
+  { prefixes: ["/contacto"], enabled: PUBLIC_FEATURES.contact },
+  { prefixes: ["/servicios"], enabled: PUBLIC_FEATURES.services },
+  { prefixes: ["/cotizar"], enabled: PUBLIC_FEATURES.quote },
+  { prefixes: ["/tienda"], enabled: PUBLIC_FEATURES.store },
+  { prefixes: ["/education"], enabled: PUBLIC_FEATURES.education },
+  { prefixes: ["/events"], enabled: PUBLIC_FEATURES.events },
+  { prefixes: ["/express"], enabled: PUBLIC_FEATURES.express },
+  { prefixes: ["/checkout"], enabled: PUBLIC_FEATURES.checkout },
+  { prefixes: ["/clientes"], enabled: PUBLIC_FEATURES.customers },
+  { prefixes: ["/promos"], enabled: PUBLIC_FEATURES.promotions },
+  { prefixes: ["/referidos"], enabled: PUBLIC_FEATURES.referrals },
+] as const;
 
 function addOrigin(target: Set<string>, value: string | null | undefined) {
   if (!value) return;
@@ -26,7 +43,7 @@ function requestOrigins(request: NextRequest) {
   return allowed;
 }
 
-export async function middleware(request: NextRequest) {
+async function protectAdmin(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (["/admin/login", "/admin/recuperar", "/admin/restablecer"].includes(pathname)) return NextResponse.next();
 
@@ -48,8 +65,7 @@ export async function middleware(request: NextRequest) {
   }
 
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-  const isStaff = isUserRole(token?.role);
-  if (isStaff) return NextResponse.next();
+  if (isUserRole(token?.role)) return NextResponse.next();
 
   if (pathname.startsWith("/api/admin")) {
     return NextResponse.json({ ok: false, error: "Debes iniciar sesión.", code: "UNAUTHORIZED" }, { status: 401 });
@@ -60,4 +76,38 @@ export async function middleware(request: NextRequest) {
   return NextResponse.redirect(loginUrl);
 }
 
-export const config = { matcher: ["/admin/:path*", "/api/admin/:path*"] };
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+    return protectAdmin(request);
+  }
+
+  const guarded = guardedRoutes.find(({ prefixes }) => prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)));
+  if (!guarded || guarded.enabled) return NextResponse.next();
+
+  const target = request.nextUrl.clone();
+  target.pathname = "/en-construccion";
+  target.search = "";
+  return NextResponse.redirect(target);
+}
+
+export const config = {
+  matcher: [
+    "/admin/:path*",
+    "/api/admin/:path*",
+    "/proyectos/:path*",
+    "/portafolio/:path*",
+    "/nosotros/:path*",
+    "/contacto/:path*",
+    "/servicios/:path*",
+    "/cotizar/:path*",
+    "/tienda/:path*",
+    "/education/:path*",
+    "/events/:path*",
+    "/express/:path*",
+    "/checkout/:path*",
+    "/clientes/:path*",
+    "/promos/:path*",
+    "/referidos/:path*",
+  ],
+};

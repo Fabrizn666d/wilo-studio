@@ -1,15 +1,16 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowUpRight, Globe2, UsersRound, ChartNoAxesCombined } from "lucide-react";
 import { FullBleedSection } from "./HomeLayout";
 import styles from "./closing-scenes.module.css";
 
 const countries = [
-  ["PE", "Perú", "Nuestro origen"], ["MX", "México", "Atención remota"],
-  ["CO", "Colombia", "Atención remota"], ["CL", "Chile", "Atención remota"],
-  ["AR", "Argentina", "Atención remota"], ["BR", "Brasil", "Atención remota"],
-  ["US", "Estados Unidos", "Estructura internacional"], ["CA", "Canadá", "Atención remota"],
-  ["DE", "Alemania", "Atención remota"], ["EC", "Ecuador", "Atención remota"],
-  ["UY", "Uruguay", "Atención remota"], ["BO", "Bolivia", "Atención remota"],
+  ["PE", "Perú", "Nuestro origen", "/flags/pe.svg"], ["MX", "México", "Atención remota", "/flags/mx.svg"],
+  ["CO", "Colombia", "Atención remota", "/flags/co.svg"], ["CL", "Chile", "Atención remota", "/flags/cl.svg"],
+  ["AR", "Argentina", "Atención remota", "/flags/ar.svg"], ["BR", "Brasil", "Atención remota", "/flags/br.svg"],
+  ["US", "Estados Unidos", "Estructura internacional", "/flags/us.svg"], ["CA", "Canadá", "Atención remota", "/flags/ca.svg"],
+  ["DE", "Alemania", "Atención remota", "/flags/de-country.svg"], ["EC", "Ecuador", "Atención remota", "/flags/ec.svg"],
+  ["UY", "Uruguay", "Atención remota", "/flags/uy.svg"], ["BO", "Bolivia", "Atención remota", "/flags/bo.svg"],
 ] as const;
 
 export function InternationalScene() {
@@ -23,9 +24,17 @@ export function InternationalScene() {
           <p className={styles.eyebrow} data-reveal="eyebrow"><span>12</span><i /> WILO SIN FRONTERAS</p>
           <h2 id="international-heading" data-reveal="heading">DE AREQUIPA<br />PARA DONDE<br /><em>LLEGUEN<br />LAS IDEAS<span>.</span></em></h2>
           <p className={styles.intro} data-reveal="copy">Wilo Studio nació en Arequipa, Perú. Hoy nuestra estructura nos permite desarrollar proyectos, coordinar equipos y atender a clientes dentro y fuera del país.</p>
-          <div className={styles.entities} data-reveal="cards">
-            <a href="/contacto" className={styles.entity}><span className={styles.entityMark}>w<span>ilo</span><small>STUDIO</small></span><span><strong>WILO GLOBAL INDUSTRIES LLC</strong><small>United States</small><small>Facturación internacional</small></span><ArrowUpRight size={20} /></a>
-            <a href="/contacto" className={styles.entity}><span className={styles.entityMark}>w<span>ilo</span><small>STUDIO</small></span><span><strong>WILO INDUSTRIES GROUP E.I.R.L.</strong><small>Perú</small><small>Facturación peruana</small></span><ArrowUpRight size={20} /></a>
+          <div className={styles.entities} data-reveal="cards" aria-label="Entidades de Wilo Studio">
+            <Link href="/#contacto-home" className={styles.entity}>
+              <span className={styles.entityCountry}><Image src="/flags/pe.svg" alt="" width={44} height={30} /><b>PERÚ</b><small>01</small></span>
+              <span className={styles.entityBody}><strong>WILO INDUSTRIES GROUP E.I.R.L.</strong><small>Facturación peruana</small></span>
+              <span className={styles.entityArrow}><ArrowUpRight size={20} /></span>
+            </Link>
+            <Link href="/#contacto-home" className={styles.entity}>
+              <span className={styles.entityCountry}><Image src="/flags/us.svg" alt="" width={44} height={30} /><b>USA</b><small>02</small></span>
+              <span className={styles.entityBody}><strong>WILO GLOBAL INDUSTRIES LLC</strong><small>Facturación internacional</small></span>
+              <span className={styles.entityArrow}><ArrowUpRight size={20} /></span>
+            </Link>
           </div>
           <div className={styles.internationalBenefits} data-reveal="details"><span><Globe2 />Atención<br />remota</span><span><UsersRound />Proyectos<br />sin fronteras</span><span><ChartNoAxesCombined />Mismos estándares<br />de calidad</span></div>
           <p className={styles.handNote} data-reveal="note">Las buenas ideas<br />no necesitan pasaporte.</p>
@@ -41,8 +50,8 @@ export function InternationalScene() {
         <p className={styles.globalNote} data-reveal="note">Un mismo propósito<br />en cualquier lugar.</p>
       </div>
       <div className={styles.countryRail} aria-label="Mercados que podemos atender">
-        <strong>ATENCIÓN<br />SIN FRONTERAS</strong>
-        <div className={styles.countryWindow}><div className={styles.countryTrack}>{[0, 1].map((copy) => <div className={styles.countryGroup} key={copy} aria-hidden={copy === 1 ? true : undefined}>{countries.map(([code, name, note]) => <div className={styles.country} key={code}><span className={styles.countryCode} data-country={code}>{code}</span><span><b>{name}</b><small>{note}</small></span></div>)}</div>)}</div></div>
+        <strong>DE AREQUIPA<br /><em>AL MUNDO</em></strong>
+        <div className={styles.countryWindow}><div className={styles.countryTrack}>{[0, 1].map((copy) => <div className={styles.countryGroup} key={copy} aria-hidden={copy === 1 ? true : undefined}>{countries.map(([code, name, note, flag]) => <div className={styles.country} key={code}><Image className={styles.countryFlag} src={flag} alt={copy ? "" : `Bandera de ${name}`} width={36} height={24} /><span><b>{name}</b><small>{note}</small></span></div>)}</div>)}</div></div>
       </div>
       <div className={styles.sceneSignature}><span>WILO STUDIO · IDEAS PARA UN MUNDO REAL</span><span>AREQUIPA, PERÚ — UNITED STATES — EL MUNDO</span></div>
     </FullBleedSection>

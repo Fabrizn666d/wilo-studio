@@ -4,15 +4,13 @@ import { AboutWiloShowcase } from "@/components/home/AboutWiloShowcase";
 import { HeroWilo } from "@/components/home/HeroWilo";
 import { CarouselFrame, FullBleedSection, SectionShell, ViewportFrame } from "@/components/home/HomeLayout";
 import { HomeSceneMotion } from "@/components/home/HomeSceneMotion";
-import { LabExplorer } from "@/components/home/LabExplorer";
 import { ProcessJourney } from "@/components/home/ProcessJourney";
 import { ServicesCarousel } from "@/components/home/ServicesCarousel";
 import { StudioCarousel } from "@/components/home/StudioCarousel";
 import { TechnologyScene } from "@/components/home/TechnologyScene";
-import { StoreScene } from "@/components/home/StoreScene";
 import { InternationalScene } from "@/components/home/InternationalScene";
 import { ContactScene } from "@/components/home/ContactScene";
-import { ecosystemLines, labModules, processSteps } from "@/data/studio";
+import { ecosystemLines, processSteps } from "@/data/studio";
 import { getPublicSiteSettings } from "@/lib/site-settings";
 import { getStudioProjects } from "@/lib/studio-projects";
 import styles from "./studio-home.module.css";
@@ -69,13 +67,8 @@ export default async function HomePage() {
         </CarouselFrame>
       </FullBleedSection>
       <ServicesCarousel />
-      <SectionShell className={styles.labSection} frame="wide" id="lab" aria-labelledby="lab-title">
-        <h2 className={styles.srOnly} id="lab-title">Wilo Lab</h2>
-        <LabExplorer modules={labModules} />
-      </SectionShell>
       <ProcessJourney steps={processSteps} />
       <TechnologyScene />
-      <StoreScene />
       <SectionShell className={styles.ecosystemSection} frame="wide" id="ecosistema" aria-labelledby="ecosystem-title" spacing="compact">
         <EcosystemExplorer lines={ecosystemLines} />
       </SectionShell>

@@ -2,13 +2,14 @@ export const siteConfig = {
   name: "Wilo Studio",
   legalName: "WILO INDUSTRIES GROUP E.I.R.L.",
   ruc: "10614138365",
-  phoneDisplay: "+51 936 617 557",
-  phone: "51936617557",
+  phoneDisplay: "+51 919 699 194",
+  phone: "51919699194",
   email: "hola@wilostudio.com", // TODO: validar con el dueño antes de producción.
   location: "Arequipa, Perú",
   url: "https://wilostudio.site",
+  ein: process.env.NEXT_PUBLIC_WILO_US_EIN?.trim() || null,
   whatsapp:
-    "https://wa.me/51936617557?text=Hola%20Wilo%20Studio%2C%20quiero%20cotizar%20un%20proyecto.",
+    "https://wa.me/51919699194?text=Hola%20Wilo%20Studio%2C%20quiero%20cotizar%20un%20proyecto.",
 } as const;
 
 export const primaryNav = [

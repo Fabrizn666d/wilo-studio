@@ -14,6 +14,7 @@ import {
 import type { StudioProject } from "@/data/studio";
 import { useHydratedReducedMotion } from "@/lib/use-hydrated-reduced-motion";
 import styles from "./studio-carousel.module.css";
+import { publicHref } from "@/lib/public-release";
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const modulo = (value: number, length: number) => ((value % length) + length) % length;
@@ -502,7 +503,7 @@ export function StudioCarousel({ projects }: { projects: readonly StudioProject[
           <h3>{activeProject.name}</h3>
           <p>{activeProject.shortDescription}</p>
         </div>
-        <Link className={styles.projectLink} href={`/proyectos/${activeProject.slug}`}>
+        <Link className={styles.projectLink} href={publicHref("projects", `/proyectos/${activeProject.slug}`)}>
           Explorar proyecto <ArrowUpRight aria-hidden="true" />
         </Link>
       </div>

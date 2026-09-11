@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowDown,
@@ -13,6 +12,8 @@ import {
   Zap,
 } from "lucide-react";
 import { EcosystemLeadForm } from "@/components/public-routes/ecosystem-lead-form";
+import { AudiovisualScene } from "@/components/home/AudiovisualScene";
+import { HomeSceneMotion } from "@/components/home/HomeSceneMotion";
 import { siteConfig } from "@/lib/content";
 import styles from "./events-cinematic.module.css";
 
@@ -68,52 +69,7 @@ export default function EventsBridgePage() {
     <main className={`pr-page ${styles.page}`} id="contenido">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c") }} />
 
-      <header className={styles.hero}>
-        <Image
-          alt="Escenario corporativo con pantallas, iluminación y público"
-          className={styles.heroImage}
-          fill
-          priority
-          sizes="100vw"
-          src="/images/wilo/generated/events-stage-v2.webp"
-        />
-        <div className={styles.heroShade} aria-hidden="true" />
-        <div className={styles.heroGrid} aria-hidden="true" />
-
-        <div className={styles.shell}>
-          <nav aria-label="Migas de pan" className={styles.breadcrumbs}>
-            <Link href="/">Wilo Studio</Link>
-            <span aria-hidden="true">/</span>
-            <span>Events</span>
-          </nav>
-
-          <div className={styles.heroCopy}>
-            <span className={styles.kicker}><b>09</b> Wilo Events</span>
-            <h1>Experiencias que <em>conectan personas.</em></h1>
-            <p>
-              Coordinamos producción audiovisual e infraestructura técnica para eventos, desde una sola conversación y con el alcance definido antes de empezar.
-            </p>
-            <div className={styles.heroActions}>
-              <a className={styles.primaryButton} href="#cotizar">Cuéntanos tu evento <ArrowDown aria-hidden="true" /></a>
-              <Link className={styles.lineButton} href="/servicios/infraestructura-eventos">Ver infraestructura <ArrowRight aria-hidden="true" /></Link>
-            </div>
-          </div>
-
-          <div className={styles.heroServiceRail} aria-label="Áreas de producción para eventos">
-            {groups.map((group, index) => (
-              <div key={group.label}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <strong>{group.label}</strong>
-                <small>{group.items}</small>
-              </div>
-            ))}
-          </div>
-
-          <a className={styles.scrollCue} href="#capacidades" aria-label="Ver capacidades para eventos">
-            <span>Explorar</span><i aria-hidden="true" />
-          </a>
-        </div>
-      </header>
+      <AudiovisualScene />
 
       <section className={styles.offeringSection} id="capacidades" aria-labelledby="events-servicios">
         <div className={styles.shell}>
@@ -183,6 +139,7 @@ export default function EventsBridgePage() {
           <Link href="/servicios/infraestructura-eventos">Ver la página del servicio <ArrowRight aria-hidden="true" /></Link>
         </div>
       </section>
+      <HomeSceneMotion />
     </main>
   );
 }

@@ -5,7 +5,7 @@ import { CartProvider } from "./cart-provider";
 import { CartDrawer } from "./cart-drawer";
 import { Preloader } from "./preloader";
 import { SiteFooter } from "./site-footer";
-import { SiteHeader } from "./site-header";
+import { HeroNavigation } from "./home/HeroNavigation";
 import { SiteSettingsProvider } from "./site-settings-provider";
 import { SmoothScroll } from "./smooth-scroll";
 import { WhatsappFab } from "./whatsapp-fab";
@@ -19,13 +19,16 @@ export function ClientShell({ children, settings, initialLocale }: { children: R
   if (pathname.startsWith("/admin")) {
     return <I18nProvider initialLocale={initialLocale}><SiteSettingsProvider initialValue={settings}>{children}</SiteSettingsProvider></I18nProvider>;
   }
+  if (pathname === "/en-construccion") {
+    return <I18nProvider initialLocale={initialLocale}><SiteSettingsProvider initialValue={settings}>{children}</SiteSettingsProvider></I18nProvider>;
+  }
   return (
     <I18nProvider initialLocale={initialLocale}>
       <SiteSettingsProvider initialValue={settings}>
         <CartProvider>
           {pathname === "/" ? <Preloader /> : null}
           {pathname === "/" ? null : <SmoothScroll />}
-          {pathname === "/" ? null : <SiteHeader />}
+          {pathname === "/" ? null : <HeroNavigation subpage />}
           {pathname === "/" ? (
             <>
               <FullPageController>{children}</FullPageController>

@@ -2,5 +2,5 @@ import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/content";
 
 export default function robots(): MetadataRoute.Robots {
-  return { rules: [{ userAgent: "*", allow: "/", disallow: ["/admin/", "/api/", "/checkout"] }], sitemap: `${siteConfig.url}/sitemap.xml`, host: siteConfig.url };
+  return { rules: [{ userAgent: "*", allow: "/", disallow: ["/admin/", "/api/", "/checkout", "/sitios-reales", "/en-construccion"] }], sitemap: `${siteConfig.url}/sitemap.xml`, host: siteConfig.url };
 }

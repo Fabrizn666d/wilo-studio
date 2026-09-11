@@ -1,261 +1,105 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Compass,
-  Eye,
-  Gauge,
-  HeartHandshake,
-  Layers3,
-  MapPin,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
-import { RouteCta } from "@/components/public-routes/route-ui";
+import { ArrowRight, ArrowUpRight, Compass, Globe2, Layers3, Lightbulb, MapPin, MoveUpRight, Sparkles } from "lucide-react";
 import { aboutWilo } from "@/data/studio";
 import { getPublicSiteSettings } from "@/lib/site-settings";
 import styles from "./nosotros.module.css";
 
 export const metadata: Metadata = {
   title: "Nosotros | Wilo Studio desde Arequipa",
-  description:
-    "Conoce el origen, misión, visión y valores de Wilo Studio: tecnología, diseño, producción y educación construidos desde Arequipa, Perú.",
+  description: "Conoce el origen y la forma de pensar de Wilo Studio: tecnología, diseño y producción construidos desde Arequipa para cualquier lugar.",
   alternates: { canonical: "/nosotros" },
   openGraph: {
     title: "Nosotros | Wilo Studio",
-    description: "Somos de Arequipa. Construimos soluciones para cualquier lugar.",
+    description: "Somos de Arequipa. Construimos para cualquier lugar.",
     url: "/nosotros",
-    images: [
-      {
-        url: "/images/wilo/generated/about-arequipa-v2.webp",
-        width: 1920,
-        height: 640,
-        alt: "Composición visual inspirada en Arequipa y el Misti",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Nosotros | Wilo Studio",
-    description: "Tecnología y creatividad con origen en Arequipa.",
-    images: ["/images/wilo/generated/about-arequipa-v2.webp"],
+    images: [{ url: "/images/wilo/generated/about-arequipa-v2.webp", width: 1920, height: 640, alt: "Arequipa y el Misti, origen de Wilo Studio" }],
   },
 };
 
-const approach = [
-  {
-    icon: Compass,
-    number: "01",
-    title: "Partimos del contexto",
-    text: "Antes de proponer una solución, entendemos el objetivo, las personas y las restricciones reales.",
-  },
-  {
-    icon: Layers3,
-    number: "02",
-    title: "Ordenamos lo complejo",
-    text: "Convertimos información, procesos y decisiones en una experiencia clara y utilizable.",
-  },
-  {
-    icon: ShieldCheck,
-    number: "03",
-    title: "Construimos una base sólida",
-    text: "Cuidamos estructura, accesibilidad, rendimiento y mantenimiento según el alcance del proyecto.",
-  },
-  {
-    icon: Gauge,
-    number: "04",
-    title: "Dejamos espacio para evolucionar",
-    text: "La entrega se prepara para que pueda mantenerse y crecer cuando el negocio lo necesite.",
-  },
+const principles = [
+  { icon: Compass, number: "01", title: "Entender antes de diseñar", text: "Leemos el negocio, el contexto y a las personas antes de elegir una solución." },
+  { icon: Lightbulb, number: "02", title: "Convertir ideas en sistemas", text: "Unimos estrategia, diseño y tecnología para que cada parte tenga una razón." },
+  { icon: Layers3, number: "03", title: "Construir sin plantillas", text: "La solución se adapta al proyecto; el proyecto no se fuerza dentro de una fórmula." },
+  { icon: MoveUpRight, number: "04", title: "Dejar espacio para crecer", text: "Entregamos una base clara, mantenible y preparada para evolucionar." },
 ] as const;
 
 export const dynamic = "force-dynamic";
 
 export default async function AboutPage() {
   const settings = await getPublicSiteSettings();
-
   return (
     <main id="contenido" className={`pr-page ${styles.page}`}>
-      <header className={styles.hero}>
-        <Image
-          alt=""
-          aria-hidden="true"
-          className={styles.heroImage}
-          fill
-          priority
-          sizes="100vw"
-          src="/images/wilo/generated/about-arequipa-v2.webp"
-        />
-        <div className={styles.heroShade} aria-hidden="true" />
+      <section className={styles.origin} aria-labelledby="about-origin-title">
+        <Image className={styles.originImage} src="/images/wilo/generated/about-arequipa-v2.webp" alt="" aria-hidden="true" fill priority sizes="100vw" />
+        <div className={styles.originVeil} aria-hidden="true" />
         <div className={styles.shell}>
-          <div className={styles.heroCopy}>
-            <p className={styles.kicker}>10 · Sobre Wilo</p>
-            <h1>
-              Somos de <em>Arequipa.</em>
-              <span>Construimos para cualquier lugar.</span>
-            </h1>
+          <div className={styles.originCopy}>
+            <p className={styles.kicker}><span>01</span><i /> NUESTRO ORIGEN</p>
+            <h1 id="about-origin-title">SOMOS DE <em>AREQUIPA.</em><small>Construimos para cualquier lugar.</small></h1>
             <p>{aboutWilo.story}</p>
             <div className={styles.actions}>
-              <Link className={styles.primaryButton} href="/contacto">
-                Iniciar un proyecto <ArrowRight aria-hidden="true" />
-              </Link>
-              <Link className={styles.secondaryButton} href="/proyectos">
-                Ver proyectos <ArrowUpRight aria-hidden="true" />
-              </Link>
+              <Link className={styles.primaryAction} href="/contacto">Iniciar un proyecto <ArrowRight aria-hidden="true" /></Link>
+              <Link className={styles.textAction} href="/proyectos">Ver proyectos <ArrowUpRight aria-hidden="true" /></Link>
             </div>
           </div>
-          <div className={styles.locationCard}>
-            <MapPin aria-hidden="true" />
-            <div>
-              <span>Origen</span>
-              <strong>{aboutWilo.origin}</strong>
-              <p>Identidad local y una forma de trabajo preparada para colaborar a distancia.</p>
-            </div>
-          </div>
-          <p className={styles.imageCaption}>Composición visual inspirada en Arequipa y el Misti.</p>
-        </div>
-      </header>
-
-      <section className={styles.storySection} aria-labelledby="about-story-title">
-        <div className={styles.shell}>
-          <div className={styles.storyIndex} aria-hidden="true">
-            <span>W</span>
-            <i />
-          </div>
-          <div className={styles.storyCopy}>
-            <p className={styles.kicker}>01 · Nuestro origen</p>
-            <h2 id="about-story-title">
-              Tecnología y creatividad con un punto de partida <em>concreto.</em>
-            </h2>
-            <p>
-              Wilo nace en Arequipa con una idea práctica: reunir distintas capacidades cuando un reto necesita más que una sola disciplina. La forma cambia con cada proyecto; el criterio se mantiene.
-            </p>
-          </div>
-          <div className={styles.storyFacts} aria-label="Datos sobre Wilo Studio">
-            <article>
-              <span>Base</span>
-              <strong>Arequipa, Perú</strong>
-            </article>
-            <article>
-              <span>Trabajo</span>
-              <strong>Tecnología, diseño y producción</strong>
-            </article>
-            <article>
-              <span>Alcance</span>
-              <strong>Proyectos coordinados en todo el Perú</strong>
-            </article>
-          </div>
+          <aside className={styles.originStamp}>
+            <MapPin aria-hidden="true" /><span>16.4090° S · 71.5375° W</span><strong>AREQUIPA<br />PERÚ</strong><small>El punto de partida.</small>
+          </aside>
+          <p className={styles.originNote}>Las buenas ideas<br />también tienen origen.<i /></p>
         </div>
       </section>
 
-      <section className={styles.purposeSection} aria-labelledby="about-purpose-title">
+      <section className={styles.thinking} aria-labelledby="about-thinking-title">
         <div className={styles.shell}>
-          <div className={styles.purposeHeading}>
-            <p className={styles.kicker}>02 · Propósito</p>
-            <h2 id="about-purpose-title">Una dirección compartida para todo el ecosistema.</h2>
-            <p>La misión y la visión están escritas para orientar decisiones, no para llenar una presentación.</p>
+          <header className={styles.thinkingHeading}>
+            <p className={styles.kicker}><span>02</span><i /> CÓMO PENSAMOS</p>
+            <h2 id="about-thinking-title">NO SOMOS UNA FÁBRICA DE WEBS.<br /><em>SOMOS UN ESTUDIO DE SOLUCIONES.</em></h2>
+            <p>La tecnología es una herramienta. El criterio, la curiosidad y el trabajo cercano son lo que convierte una idea en algo útil.</p>
+          </header>
+          <div className={styles.thinkingStage} aria-hidden="true">
+            <span className={styles.orbitOne} /><span className={styles.orbitTwo} /><span className={styles.thinkingW}>W</span>
+            <Image src="/brand/wilo-mascot-cutout.webp" alt="" fill sizes="(max-width: 760px) 90vw, 42vw" />
+            <p>Adaptarnos<br />sin perder<br />la esencia.<i /></p>
           </div>
-
-          <div className={styles.purposeGrid}>
-            <article className={styles.missionCard}>
-              <div>
-                <HeartHandshake aria-hidden="true" />
-                <span>01</span>
-              </div>
-              <p>Misión</p>
-              <h3>{aboutWilo.mission}</h3>
-            </article>
-            <article className={styles.visionCard}>
-              <div>
-                <Eye aria-hidden="true" />
-                <span>02</span>
-              </div>
-              <p>Visión</p>
-              <h3>{aboutWilo.vision}</h3>
-            </article>
-          </div>
-
-          <div className={styles.valuesBlock}>
-            <div>
-              <p className={styles.kicker}>03 · Valores</p>
-              <h3>Principios para decidir y construir.</h3>
-            </div>
-            <ol>
-              {aboutWilo.values.map((value, index) => (
-                <li key={value}>
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  <strong>{value}</strong>
-                </li>
-              ))}
-            </ol>
-          </div>
+          <ol className={styles.principles}>
+            {principles.map(({ icon: Icon, number, title, text }) => <li key={title}><span>{number}</span><Icon aria-hidden="true" /><div><h3>{title}</h3><p>{text}</p></div></li>)}
+          </ol>
         </div>
       </section>
 
-      <section className={styles.approachSection} aria-labelledby="about-approach-title">
+      <section className={styles.structure} aria-labelledby="about-structure-title">
         <div className={styles.shell}>
-          <div className={styles.approachHeading}>
-            <div>
-              <p className={styles.kicker}>04 · Cómo trabajamos</p>
-              <h2 id="about-approach-title">Adaptarnos no significa improvisar.</h2>
-            </div>
-            <p>
-              La solución se ajusta al contexto, pero cada decisión conserva una razón clara y una base que se puede mantener.
-            </p>
+          <header className={styles.structureHeading}>
+            <p className={styles.kicker}><span>03</span><i /> UNA ESTRUCTURA, DOS ORILLAS</p>
+            <h2 id="about-structure-title">RAÍCES EN PERÚ.<br /><em>ALCANCE INTERNACIONAL.</em></h2>
+            <p>Una misma forma de trabajar, preparada para atender proyectos locales y coordinar oportunidades fuera del país.</p>
+          </header>
+          <div className={styles.routeMap} aria-hidden="true"><span className={styles.peruPoint}>AQP</span><i /><span className={styles.usaPoint}>USA</span><Globe2 /></div>
+          <div className={styles.entityRail}>
+            <article><Image src="/flags/pe.svg" alt="Bandera de Perú" width={62} height={42} /><div><span>OPERACIÓN LOCAL</span><h3>{settings.legalName}</h3><p>Arequipa, Perú · Facturación peruana</p></div><strong>PE</strong></article>
+            <article><Image src="/flags/us.svg" alt="Bandera de Estados Unidos" width={62} height={42} /><div><span>ESTRUCTURA INTERNACIONAL</span><h3>WILO GLOBAL INDUSTRIES LLC</h3><p>United States · International business</p></div><strong>US</strong></article>
           </div>
-          <div className={styles.approachGrid}>
-            {approach.map(({ icon: Icon, number, title, text }) => (
-              <article key={title}>
-                <div>
-                  <Icon aria-hidden="true" />
-                  <span>{number}</span>
-                </div>
-                <h3>{title}</h3>
-                <p>{text}</p>
-              </article>
-            ))}
-          </div>
+          <p className={styles.structureNote}>Un mismo propósito.<br />Distintas coordenadas.<i /></p>
         </div>
       </section>
 
-      <section className={styles.identitySection} aria-labelledby="about-identity-title">
+      <section className={styles.manifesto} aria-labelledby="about-manifesto-title">
+        <div className={styles.manifestoGlow} aria-hidden="true" />
         <div className={styles.shell}>
-          <div className={styles.identityCard}>
-            <div className={styles.identityCopy}>
-              <p className={styles.kicker}>05 · Identidad</p>
-              <h2 id="about-identity-title">Cambiar de enfoque sin perder la esencia.</h2>
-              <p>
-                El camaleón representa esa capacidad: leer el contexto de cada negocio, adaptarse al reto y conservar una identidad reconocible.
-              </p>
-              <div className={styles.legalCard}>
-                <span>Titular</span>
-                <strong>{settings.legalName}</strong>
-                <small>
-                  {settings.name} · RUC {settings.ruc}
-                </small>
-              </div>
-            </div>
-            <figure className={styles.mascotStage}>
-              <span aria-hidden="true">W</span>
-              <Image
-                alt="Camaleón, personaje visual de Wilo Studio"
-                fill
-                sizes="(max-width: 820px) 92vw, 48vw"
-                src="/brand/wilo-mascot-cutout.webp"
-              />
-            </figure>
+          <div className={styles.manifestoCopy}>
+            <p className={styles.kicker}><span>04</span><i /> LO QUE NOS MUEVE</p>
+            <h2 id="about-manifesto-title">BUENAS IDEAS.<br />TRABAJO REAL.<br /><em>RESULTADOS QUE SÍ SE USAN.</em></h2>
+            <p>No prometemos fórmulas universales. Escuchamos, diseñamos y construimos contigo una respuesta que tenga sentido.</p>
+            <div className={styles.manifestoActions}><Link href="/cotizar">Cuéntanos tu idea <ArrowRight aria-hidden="true" /></Link><Link href="/proyectos">Explorar nuestro trabajo <ArrowUpRight aria-hidden="true" /></Link></div>
+            <small>{settings.legalName} · RUC {settings.ruc}</small>
+          </div>
+          <div className={styles.manifestoVisual}>
+            <Sparkles aria-hidden="true" /><Image src="/images/wilo/closing/contact-mascot.webp" alt="Camaleón de Wilo Studio listo para construir una nueva idea" fill sizes="(max-width: 760px) 94vw, 48vw" /><p>¿Qué construimos<br />ahora?<i /></p>
           </div>
         </div>
-        <Sparkles className={styles.identitySpark} aria-hidden="true" />
       </section>
-
-      <RouteCta
-        message="Hola Wilo Studio, quiero conversar sobre un proyecto."
-        text="Cuéntanos qué necesitas resolver y te responderemos con una ruta clara para evaluar el proyecto."
-        title="Construyamos algo que tenga sentido para tu negocio."
-      />
     </main>
   );
 }

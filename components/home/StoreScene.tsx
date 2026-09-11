@@ -21,18 +21,18 @@ export function StoreScene() {
       <div className={styles.storeTop}>
         <div className={styles.storeCopy}>
           <span className={styles.eyebrow} data-reveal="detail">09 <i /> WILO STORE</span>
-          <h2 id="store-title" data-reveal="title">TECNOLOGÍA<br />PARA TRABAJAR,<br /><em>CREAR Y CRECER.</em></h2>
+          <h1 className={styles.storeTitle} id="store-title" data-reveal="title">TECNOLOGÍA<br />PARA TRABAJAR,<br /><em>CREAR Y CRECER.</em></h1>
           <p data-reveal="detail">Equipos, accesorios y software para personas, empresas y proyectos que no se detienen.</p>
-          <div className={styles.storeActions} data-reveal="detail"><Link href="/tienda" className={styles.darkButton}>Explorar catálogo <ArrowUpRight aria-hidden="true" /></Link><Link href="/contacto?asunto=Equipamiento" className={styles.textButton}>Recibir asesoría <ArrowRight aria-hidden="true" /></Link></div>
+          <div className={styles.storeActions} data-reveal="detail"><Link href="#catalogo" className={styles.darkButton}>Explorar catálogo <ArrowUpRight aria-hidden="true" /></Link><Link href="/contacto?asunto=Equipamiento" className={styles.textButton}>Recibir asesoría <ArrowRight aria-hidden="true" /></Link></div>
           <ul className={styles.storeBenefits} data-reveal="detail"><li><Truck aria-hidden="true" /><span>Entrega<br />coordinada</span></li><li><ShieldCheck aria-hidden="true" /><span>Compra<br />acompañada</span></li><li><Headphones aria-hidden="true" /><span>Soporte<br />especializado</span></li></ul>
         </div>
         <EditorialTilt className={styles.storeStage}>
-          <div className={styles.storeProducts} data-reveal="media"><Image src="/images/wilo/generated/store-products-v1.webp" alt="Composición de laptop, workstation, auriculares, teclado y componentes de tecnología" fill sizes="(max-width: 760px) 100vw, 65vw" /></div>
+          <div className={styles.storeProducts} data-reveal="media"><Image src="/images/wilo/generated/store-products-v1.webp" alt="Composición de laptop, workstation, auriculares, teclado y componentes de tecnología" fill priority sizes="(max-width: 760px) 100vw, 65vw" /></div>
           <span className={`${styles.handwritten} ${styles.storeNote}`} data-reveal="detail">El equipo<br />también hace<br />la diferencia.</span>
         </EditorialTilt>
       </div>
       <div className={styles.categoryGrid} data-reveal="detail">{categories.map(({ title, text, Icon, position, type }) => <Link href={position ? `/contacto?asunto=${encodeURIComponent(title)}` : "/tienda"} key={title} className={styles.category} data-category={type}><div><h3>{title}</h3><p>{text}</p><span className={styles.categoryArrow}><ArrowRight aria-hidden="true" /></span></div>{position ? <span className={styles.categoryPhoto} style={{ "--object-position": position } as React.CSSProperties}><Image src="/images/wilo/generated/store-products-v1.webp" alt="" fill sizes="220px" /></span> : <Icon className={styles.categoryIcon} aria-hidden="true" />}</Link>)}</div>
-      <div className={styles.storeBanner} data-reveal="media"><div><span>WILO STORE</span><h3>Equipamos hoy<br />los proyectos del mañana.</h3></div><p><Sparkles aria-hidden="true" />Tecnología que impulsa tus ideas.</p><Link href="/tienda">Visitar la tienda <ArrowUpRight aria-hidden="true" /></Link></div>
+      <div className={styles.storeBanner} data-reveal="media"><div><span>WILO STORE</span><h3>Equipamos hoy<br />los proyectos del mañana.</h3></div><p><Sparkles aria-hidden="true" />Tecnología que impulsa tus ideas.</p><Link href="#catalogo">Visitar la tienda <ArrowUpRight aria-hidden="true" /></Link></div>
     </ViewportFrame>
   </FullBleedSection>;
 }

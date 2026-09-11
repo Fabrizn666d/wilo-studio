@@ -287,7 +287,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .logoMarqueeTrack { animation: none !important; }
+  /* Este rail comunica continuidad de marcas y debe conservar el loop incluso
+     cuando el sistema reduce el resto del motion de entrada. */
+  .logoMarqueeTrack { animation: aboutLogoMarquee 30s linear infinite !important; }
   .atmosphere > i,
   .cardStack { animation: none !important; }
   .capabilityCard,

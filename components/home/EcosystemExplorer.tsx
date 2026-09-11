@@ -20,6 +20,7 @@ import {
 import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
 import styles from "./ecosystem-explorer.module.css";
+import { publicHref } from "@/lib/public-release";
 
 type EcosystemLine = {
   key: string;
@@ -115,7 +116,7 @@ export function EcosystemExplorer({ lines }: { lines: readonly EcosystemLine[] }
             <div className={styles.cardIndex}><strong>02</strong><span>EXPRESS</span></div>
             <h3>Wilo <em>Express</em></h3>
             <p>Webs rápidas, administrables y profesionales para lanzar tu negocio sin complicaciones.</p>
-            <Link href={href("express", process.env.NEXT_PUBLIC_WILO_EXPRESS_URL || "https://wilo.site")}>Conocer Express <ArrowUpRight aria-hidden="true" /></Link>
+            <Link href={publicHref("express", href("express", process.env.NEXT_PUBLIC_WILO_EXPRESS_URL || "https://wilo.site"))}>Conocer Express <ArrowUpRight aria-hidden="true" /></Link>
           </div>
           <Image className={`${styles.deviceArt} ${styles.mediaReveal}`} src="/ecosystem/express/express-devices.png" alt="La web real de Wilo Express presentada en laptop y celular" width={1800} height={1140} sizes="(max-width: 760px) 92vw, 48vw" />
           <FeatureRow group="express" />
@@ -127,7 +128,7 @@ export function EcosystemExplorer({ lines }: { lines: readonly EcosystemLine[] }
             <div className={styles.cardIndex}><strong>03</strong><span>STEM</span></div>
             <h3>Wilo <em>Education</em></h3>
             <p>Robótica, tecnología y experiencias STEM para instituciones y estudiantes.</p>
-            <Link href={href("education", "/education")}>Conocer Education <ArrowUpRight aria-hidden="true" /></Link>
+            <Link href={publicHref("education", href("education", "/education"))}>Conocer Education <ArrowUpRight aria-hidden="true" /></Link>
           </div>
           <Image className={`${styles.robotArt} ${styles.mediaReveal}`} src="/ecosystem/education/education-robot.webp" alt="Robot educativo modular de Wilo Education" width={1024} height={1024} sizes="(max-width: 760px) 88vw, 36vw" />
           <FeatureRow group="education" />
@@ -142,17 +143,17 @@ export function EcosystemExplorer({ lines }: { lines: readonly EcosystemLine[] }
             <div className={styles.cardIndex}><strong>04</strong><span>EXPERIENCIAS</span></div>
             <h3>Wilo <em>Events</em></h3>
             <p>Producción audiovisual e infraestructura técnica para eventos y experiencias corporativas.</p>
-            <Link href={href("events", "/events")}>Conocer Events <ArrowUpRight aria-hidden="true" /></Link>
+            <Link href={publicHref("events", href("events", "/events"))}>Conocer Events <ArrowUpRight aria-hidden="true" /></Link>
           </div>
           <FeatureRow group="events" />
         </article>
       </div>
 
       <article className={`${styles.storeBand} ${styles.reveal}`} style={{ "--delay": "440ms" } as CSSProperties}>
-        <div className={styles.storeIdentity}><span>05 · EQUIPAMIENTO</span><h3>Wilo <em>Store</em></h3></div>
-        <p>Tecnología para trabajar, crear y crecer.<br /><span>Equipos · Componentes · Periféricos · Software</span></p>
+        <div className={styles.storeMedia} aria-hidden="true"><Image src="/images/wilo/generated/store-products-v1.webp" alt="" fill sizes="(max-width: 760px) 96vw, 58vw" /></div>
+        <div className={styles.storeIdentity}><span>05 · EQUIPAMIENTO</span><h3>Wilo <em>Store</em></h3><p>Tecnología para trabajar, crear y crecer.<br /><small>Equipos · Componentes · Periféricos · Software</small></p></div>
         <ShoppingBag className={styles.storeGraphic} aria-hidden="true" />
-        <Link href={href("store", "/tienda")}>Explorar catálogo <ArrowUpRight aria-hidden="true" /></Link>
+        <Link href={publicHref("store", href("store", "/tienda"))}>Explorar catálogo <ArrowUpRight aria-hidden="true" /></Link>
       </article>
     </div>
   );

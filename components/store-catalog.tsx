@@ -36,8 +36,20 @@ function fromApi(product: ApiProduct): StoreProduct {
   };
 }
 
-export function StoreCatalog({ initialItems }: { initialItems: readonly StoreProduct[] }) {
-  const [items, setItems] = useState<readonly StoreProduct[]>(initialItems);
+function withoutCategories(items: readonly StoreProduct[], hiddenCategories: readonly string[]) {
+  return items.filter((item) => !hiddenCategories.some(
+    (hidden) => item.category.localeCompare(hidden, "es", { sensitivity: "base" }) === 0,
+  ));
+}
+
+export function StoreCatalog({
+  initialItems,
+  hiddenCategories = [],
+}: {
+  initialItems: readonly StoreProduct[];
+  hiddenCategories?: readonly string[];
+}) {
+  const [items, setItems] = useState<readonly StoreProduct[]>(() => withoutCategories(initialItems, hiddenCategories));
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Todos");
   const [brand, setBrand] = useState("Todas");
@@ -50,10 +62,10 @@ export function StoreCatalog({ initialItems }: { initialItems: readonly StorePro
     fetch("/api/productos")
       .then((response) => response.ok ? response.json() : Promise.reject())
       .then((data) => {
-        if (Array.isArray(data.products)) setItems(data.products.map(fromApi));
+        if (Array.isArray(data.products)) setItems(withoutCategories(data.products.map(fromApi), hiddenCategories));
       })
       .catch(() => undefined);
-  }, []);
+  }, [hiddenCategories]);
 
   const categories = useMemo(() => ["Todos", ...Array.from(new Set(items.map((item) => item.category)))], [items]);
   const brands = useMemo(() => ["Todas", ...Array.from(new Set(items.map((item) => item.brand)))], [items]);

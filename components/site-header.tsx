@@ -10,6 +10,7 @@ import { useSiteSettings } from "./site-settings-provider";
 import { useCart } from "./cart-provider";
 import { LanguageSwitcher } from "./language-switcher";
 import { useI18n } from "./i18n-provider";
+import { publicHref } from "@/lib/public-release";
 
 const navKeys = ["nav.work", "nav.projects", "nav.services", "nav.about", "nav.ecosystem", "nav.contact"] as const;
 
@@ -75,6 +76,13 @@ export function SiteHeader() {
     return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
   };
 
+  const releaseHref = (href: string) => {
+    if (href === "/proyectos") return publicHref("projects", href);
+    if (href === "/nosotros") return publicHref("about", href);
+    if (href === "/contacto") return "/#contacto-home";
+    return href;
+  };
+
   return (
     <>
       <header className={`site-header ${scrolled ? "is-scrolled" : ""}`} data-i18n-manual>
@@ -82,7 +90,7 @@ export function SiteHeader() {
           <Brand />
           <nav className="desktop-nav" aria-label={t("a11y.mainNavigation")}>
             {primaryNav.map((item, index) => (
-              <Link aria-current={isActive(item.href) ? "page" : undefined} key={item.href} className={isActive(item.href) ? "is-active" : ""} href={item.href}>
+              <Link aria-current={isActive(item.href) ? "page" : undefined} key={item.href} className={isActive(item.href) ? "is-active" : ""} href={releaseHref(item.href)}>
                 {t(navKeys[index])}
               </Link>
             ))}
@@ -93,7 +101,7 @@ export function SiteHeader() {
               <ShoppingBag size={20} />
               {count > 0 && <span>{count}</span>}
             </button>
-            <Link className="button button-dark header-quote" href="/cotizar">
+            <Link className="button button-dark header-quote" href={publicHref("quote", "/cotizar")}>
               <MessageCircle size={18} /> {t("nav.quote")}
             </Link>
             <button aria-controls="mobile-navigation" aria-expanded={menuOpen} className="icon-button menu-button" type="button" onClick={() => setMenuOpen(true)} aria-label={t("a11y.openMenu")} ref={menuButtonRef}>
@@ -110,8 +118,8 @@ export function SiteHeader() {
         </div>
         <nav aria-label={t("a11y.mobileNavigation")}>
           <Link aria-current={pathname === "/" ? "page" : undefined} href="/">{t("nav.home")}</Link>
-          {primaryNav.map((item, index) => <Link aria-current={isActive(item.href) ? "page" : undefined} key={item.href} href={item.href}><span>0{index + 1}</span>{t(navKeys[index])}</Link>)}
-          <Link aria-current={pathname === "/contacto" ? "page" : undefined} href="/contacto"><span>07</span>{t("nav.contact")}</Link>
+          {primaryNav.map((item, index) => <Link aria-current={isActive(item.href) ? "page" : undefined} key={item.href} href={releaseHref(item.href)}><span>0{index + 1}</span>{t(navKeys[index])}</Link>)}
+          <Link aria-current={pathname === "/contacto" ? "page" : undefined} href="/#contacto-home"><span>07</span>{t("nav.contact")}</Link>
         </nav>
         <a className="button button-yellow" href={settings.whatsapp} target="_blank" rel="noreferrer">{t("nav.whatsapp")}</a>
       </div>

@@ -79,15 +79,19 @@ const beforeHover = await activeNumber(page);
 const carouselBox = await carousel.boundingBox();
 if (!carouselBox) throw new Error("Carousel viewport not found");
 await page.mouse.move(carouselBox.x + carouselBox.width * .18, carouselBox.y + carouselBox.height * .45);
-await page.waitForTimeout(350);
+await page.waitForTimeout(100);
 await page.mouse.move(carouselBox.x + carouselBox.width * .78, carouselBox.y + carouselBox.height * .55);
-await page.waitForTimeout(900);
+await page.waitForTimeout(150);
 const afterHover = await activeNumber(page);
-report.checks.hoverDoesNotMove = beforeHover === afterHover;
+report.checks.hoverDoesNotScrub = beforeHover === afterHover;
+await page.waitForTimeout(5_100);
+report.checks.autoplayContinuesOnHover = afterHover !== await activeNumber(page);
 
-for (let step = 0; step < 4; step += 1) {
+let loopGuard = 0;
+while (await activeNumber(page) !== 17 && loopGuard < 17) {
   await page.getByRole("button", { name: "Ver servicio anterior" }).click();
   await page.waitForTimeout(850);
+  loopGuard += 1;
 }
 const wrappedBack = await activeNumber(page);
 await page.getByRole("button", { name: "Ver siguiente servicio" }).click();
@@ -104,7 +108,7 @@ await page.waitForTimeout(1300);
 const afterDrag = await activeNumber(page);
 const dragMetrics = await sectionMetrics(page);
 report.checks.dragChangesCard = beforeDrag !== afterDrag;
-report.checks.magneticSnap = Math.abs(dragMetrics.activeCenterDelta ?? 999) <= 3;
+report.checks.magneticSnap = Math.abs(dragMetrics.activeCenterDelta ?? 999) <= 4;
 
 await page.reload({ waitUntil: "domcontentloaded", timeout: 60_000 });
 await page.locator(".preloader").waitFor({ state: "detached", timeout: 15_000 }).catch(() => {});

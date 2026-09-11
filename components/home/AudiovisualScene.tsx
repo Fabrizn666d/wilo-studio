@@ -36,7 +36,7 @@ export function AudiovisualScene() {
           </div>
           <EditorialTilt className={styles.contactSheet}>
             <figure className={`${styles.photo} ${styles.mainPhoto}`} data-reveal="media">
-              <div><Image src="/images/wilo/generated/audiovisual-set-v2.webp" alt="Cámara de cine profesional en un set de producción" fill sizes="(max-width: 760px) 90vw, 48vw" style={{ objectPosition: "80% center" }} /></div>
+              <div><Image src="/images/wilo/generated/audiovisual-set-v2.webp" alt="Cámara de cine profesional en un set de producción" fill priority sizes="(max-width: 760px) 90vw, 48vw" style={{ objectPosition: "80% center" }} /></div>
               <figcaption><span className={styles.record}>REC</span><span>FRAME 024 · WILO STUDIO</span></figcaption>
             </figure>
             <figure className={`${styles.photo} ${styles.cameraPhoto}`} data-reveal="media">

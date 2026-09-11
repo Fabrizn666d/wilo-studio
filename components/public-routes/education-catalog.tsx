@@ -49,7 +49,7 @@ export function EducationCatalog() {
 
   if (status === "loading") return <div className="pr-feed-state"><LoaderCircle className="pr-spin" aria-hidden="true" /><p>Consultando el catálogo de la tienda…</p></div>;
   if (status === "error") return <div className="pr-feed-state"><PackageOpen aria-hidden="true" /><p>No pudimos consultar el catálogo en este momento.</p><Link href="/tienda">Ir a la tienda</Link></div>;
-  if (!products.length) return <div className="pr-feed-state"><PackageOpen aria-hidden="true" /><p>Los kits se publicarán aquí cuando su ficha, stock y precio estén confirmados.</p><a href="https://wa.me/51936617557?text=Hola%20Wilo%20Studio%2C%20quiero%20informaci%C3%B3n%20sobre%20los%20kits%20Wilo%20Education." rel="noreferrer" target="_blank">Consultar por WhatsApp</a></div>;
+  if (!products.length) return <div className="pr-feed-state"><PackageOpen aria-hidden="true" /><p>Los kits se publicarán aquí cuando su ficha, stock y precio estén confirmados.</p><a href="https://wa.me/51919699194?text=Hola%20Wilo%20Studio%2C%20quiero%20informaci%C3%B3n%20sobre%20los%20kits%20Wilo%20Education." rel="noreferrer" target="_blank">Consultar por WhatsApp</a></div>;
 
   return (
     <div className="pr-product-grid">

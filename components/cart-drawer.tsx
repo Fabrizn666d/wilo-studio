@@ -6,6 +6,7 @@ import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { formatSoles } from "@/lib/content";
 import { useCart } from "./cart-provider";
+import { publicHref } from "@/lib/public-release";
 
 export function CartDrawer() {
   const { items, total, open, setOpen, removeItem, updateQuantity } = useCart();
@@ -77,7 +78,7 @@ export function CartDrawer() {
         </div>
         <div className="cart-items">
           {items.length === 0 ? (
-            <div className="empty-cart"><ShoppingBag size={35} /><h3>Tu carrito está esperando.</h3><p>Elige una licencia original o un kit educativo.</p><Link className="button button-dark" href="/tienda" onClick={() => setOpen(false)}>Explorar tienda</Link></div>
+            <div className="empty-cart"><ShoppingBag size={35} /><h3>Tu carrito está esperando.</h3><p>Elige una licencia original o un kit educativo.</p><Link className="button button-dark" href={publicHref("store", "/tienda")} onClick={() => setOpen(false)}>Explorar tienda</Link></div>
           ) : items.map(({ product, quantity }) => (
             <article className="cart-line" key={product.id}>
               <div className="cart-line-image"><Image src={product.image} alt="" fill sizes="84px" /></div>
@@ -86,7 +87,7 @@ export function CartDrawer() {
             </article>
           ))}
         </div>
-        {items.length > 0 && <div className="cart-summary"><div><span>{items.some((item) => item.product.price === null) ? "Total por confirmar" : "Total"}</span><strong>{items.some((item) => item.product.price === null) ? "Cotización" : formatSoles(total)}</strong></div><p>La disponibilidad, vigencia y precio final se confirman antes del pago.</p><Link className="button button-yellow" href="/checkout" onClick={() => setOpen(false)}>Continuar al checkout</Link></div>}
+        {items.length > 0 && <div className="cart-summary"><div><span>{items.some((item) => item.product.price === null) ? "Total por confirmar" : "Total"}</span><strong>{items.some((item) => item.product.price === null) ? "Cotización" : formatSoles(total)}</strong></div><p>La disponibilidad, vigencia y precio final se confirman antes del pago.</p><Link className="button button-yellow" href={publicHref("checkout", "/checkout")} onClick={() => setOpen(false)}>Continuar al checkout</Link></div>}
       </aside>
     </>
   );

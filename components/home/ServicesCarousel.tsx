@@ -1,6 +1,7 @@
 "use client";
 
 import useEmblaCarousel from "embla-carousel-react";
+import AutoScroll from "embla-carousel-auto-scroll";
 import { motion, type Variants } from "framer-motion";
 import {
   ArrowLeft,
@@ -32,6 +33,7 @@ import { serviceShowcaseItems, type ServiceShowcaseItem } from "@/data/services-
 import { useHydratedReducedMotion } from "@/lib/use-hydrated-reduced-motion";
 import { CarouselFrame, FullBleedSection, ViewportFrame } from "./HomeLayout";
 import styles from "./services-carousel.module.css";
+import { publicHref } from "@/lib/public-release";
 
 const SERVICE_COUNT = serviceShowcaseItems.length;
 const INITIAL_SERVICE = 3;
@@ -68,12 +70,12 @@ const revealVariants: Variants = {
 
 const carouselVariants: Variants = {
   hidden: {},
-  visible: { transition: { delayChildren: 0.34, staggerChildren: 0.065 } },
+  visible: { transition: { delayChildren: 0.18, staggerChildren: 0.035 } },
 };
 
 const cardEntryVariants: Variants = {
-  hidden: { opacity: 0, y: 60, scale: 0.96 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] } },
+  hidden: { opacity: 0.18, y: 28, scale: 0.985 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.56, ease: [0.22, 1, 0.36, 1] } },
 };
 
 function ServiceCard({
@@ -104,7 +106,7 @@ function ServiceCard({
         <Link
           aria-label={`Cotizar solución: ${item.shortName}`}
           className={styles.card}
-          href={`/cotizar?service=${item.slug}`}
+          href={publicHref("quote", `/cotizar?service=${item.slug}`)}
           onFocus={onFocus}
         >
           <div className={styles.cardHeader}>
@@ -132,6 +134,17 @@ function ServiceCard({
 
 export function ServicesCarousel() {
   const reducedMotion = useHydratedReducedMotion();
+  const autoScroll = useRef(
+    AutoScroll({
+      direction: "forward",
+      playOnInit: false,
+      speed: 0.85,
+      startDelay: 1200,
+      stopOnFocusIn: false,
+      stopOnInteraction: false,
+      stopOnMouseEnter: false,
+    }),
+  );
   const [viewportRef, emblaApi] = useEmblaCarousel({
     align: "center",
     containScroll: false,
@@ -139,13 +152,9 @@ export function ServicesCarousel() {
     loop: true,
     skipSnaps: false,
     watchDrag: true,
-  });
+  }, [autoScroll.current]);
   const [activeIndex, setActiveIndex] = useState(INITIAL_SERVICE);
   const [sectionInView, setSectionInView] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const [focusWithin, setFocusWithin] = useState(false);
-  const [interactionPaused, setInteractionPaused] = useState(false);
-  const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sectionRef = useRef<HTMLElement | null>(null);
   const active = serviceShowcaseItems[activeIndex] ?? serviceShowcaseItems[0];
 
@@ -155,10 +164,8 @@ export function ServicesCarousel() {
   }, [emblaApi]);
 
   const registerInteraction = useCallback(() => {
-    setInteractionPaused(true);
-    if (resumeTimer.current) clearTimeout(resumeTimer.current);
-    resumeTimer.current = setTimeout(() => setInteractionPaused(false), 5600);
-  }, []);
+    emblaApi?.plugins().autoScroll?.reset();
+  }, [emblaApi]);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -185,14 +192,12 @@ export function ServicesCarousel() {
   }, [emblaApi, syncSelection]);
 
   useEffect(() => {
-    if (!emblaApi || !sectionInView || hovered || focusWithin || interactionPaused || reducedMotion) return;
-    const timer = window.setInterval(() => emblaApi.scrollNext(), 5200);
-    return () => window.clearInterval(timer);
-  }, [emblaApi, focusWithin, hovered, interactionPaused, reducedMotion, sectionInView]);
-
-  useEffect(() => () => {
-    if (resumeTimer.current) clearTimeout(resumeTimer.current);
-  }, []);
+    if (!emblaApi) return;
+    const plugin = emblaApi.plugins().autoScroll;
+    if (sectionInView) plugin?.play(600);
+    else plugin?.stop();
+    return () => plugin?.stop();
+  }, [emblaApi, sectionInView]);
 
   const goPrevious = () => {
     registerInteraction();
@@ -250,19 +255,10 @@ export function ServicesCarousel() {
             aria-label="Catálogo de servicios digitales de Wilo Studio"
             aria-roledescription="carrusel"
             className={styles.viewport}
-            onBlur={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget)) setFocusWithin(false);
-            }}
-            onFocus={() => setFocusWithin(true)}
             onKeyDown={(event) => {
               if (event.key === "ArrowLeft") { event.preventDefault(); goPrevious(); }
               if (event.key === "ArrowRight") { event.preventDefault(); goNext(); }
             }}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            onPointerCancel={registerInteraction}
-            onPointerDown={registerInteraction}
-            onPointerUp={registerInteraction}
             ref={viewportRef}
             role="region"
             tabIndex={0}

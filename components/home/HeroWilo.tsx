@@ -3,6 +3,7 @@ import Link from "next/link";
 import { HeroNavigation } from "./HeroNavigation";
 import { HeroPointerGrid } from "./HeroPointerGrid";
 import styles from "./hero-wilo.module.css";
+import { publicHref } from "@/lib/public-release";
 
 export function HeroWilo() {
   return (
@@ -48,7 +49,7 @@ export function HeroWilo() {
           <Link className={styles.primaryAction} href="/#trabajos">
             Ver proyectos <span aria-hidden="true">↗</span>
           </Link>
-          <Link className={styles.secondaryAction} href="/contacto#cotizador">
+          <Link className={styles.secondaryAction} href={publicHref("quote", "/cotizar")}>
             Iniciar un proyecto <span aria-hidden="true">↗</span>
           </Link>
         </div>
